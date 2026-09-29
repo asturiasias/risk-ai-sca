@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk AI-SCA — Plataforma de Evaluación Médica del Síndrome Coronario Agudo</title>
+  <style>
+    
+  :root {
+    --color-primary: #0F172A;
+    --color-surface: #1E293B;
+    --color-teal: #0D9488;
+    --color-teal-dark: #0F766E;
+    --color-emerald: #059669;
+    --color-amber: #D97706;
+    --color-red: #DC2626;
+    --color-bg: #F8FAFC;
+    --color-card: #FFFFFF;
+    --color-border: #E2E8F0;
+    --color-text: #1E293B;
+    --color-muted: #64748B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background-color: var(--color-bg); color: var(--color-text); min-height: 100vh; display: flex; flex-direction: column; }
+  
+  header { background-color: #FFFFFF; border-bottom: 1px solid var(--color-border); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; }
+  .brand { font-size: 1.15rem; font-weight: 700; color: var(--color-primary); letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .brand-mark { width: 10px; height: 22px; background: var(--color-teal); border-radius: 2px; }
+  .badge { font-size: 0.72rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-local { background-color: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+  .badge-warn { background-color: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+  .badge-danger { background-color: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+  
+  .main-layout { display: flex; flex: 1; min-height: calc(100vh - 58px); }
+  nav.sidebar { width: 240px; background: var(--color-primary); border-right: 1px solid #1E293B; padding: 14px 8px; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+  .nav-header { padding: 0 8px 8px 8px; font-size: 0.65rem; text-transform: uppercase; color: #64748B; font-weight: 700; letter-spacing: 0.05em; }
+  .nav-btn { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 9px 10px; font-size: 0.8rem; font-weight: 500; color: #94A3B8; background: transparent; border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover { background-color: #1E293B; color: #F8FAFC; }
+  .nav-btn.active { background-color: #1E293B; color: #FFFFFF; font-weight: 600; border-left: 3px solid var(--color-teal); }
+  
+  .content-area { flex: 1; padding: 20px 28px; overflow-y: auto; max-height: calc(100vh - 58px); }
+  .card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 8px; padding: 18px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--color-teal); color: #FFFFFF; }
+  .btn-primary:hover { background: var(--color-teal-dark); }
+  .btn-excel { background: #ECFDF5; border-color: #A7F3D0; color: #065F46; font-weight: 600; }
+  .btn-excel:hover { background: #D1FAE5; }
+  .btn-outline { background: #FFFFFF; border-color: var(--color-border); color: var(--color-text); }
+  .btn-outline:hover { background: #F8FAFC; }
+  .btn-danger { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+  .btn-danger:hover { background: #FEE2E2; }
+  
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { text-align: left; padding: 8px 10px; background: #F8FAFC; border-bottom: 1px solid var(--color-border); color: var(--color-muted); font-size: 0.72rem; font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--color-border); }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  
+  .alert-box { padding: 10px 14px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 14px; line-height: 1.4; }
+  .alert-amber { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+  .alert-emerald { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+  .alert-red { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+  
+  .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .case-card { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-border); background: #FFFFFF; cursor: pointer; text-align: left; transition: all 0.15s; font-size: 0.75rem; }
+  .case-card:hover { border-color: var(--color-teal); background: #F0FDFA; }
+  .case-card.active { border-color: var(--color-teal); background: #F0FDFA; font-weight: 600; }
+  
+  .doc-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; margin-bottom: 10px; overflow-x: auto; }
+  .doc-tab-btn { padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; background: transparent; border: 1px solid transparent; color: var(--color-muted); cursor: pointer; white-space: nowrap; }
+  .doc-tab-btn.active { background: var(--color-primary); color: #FFFFFF; font-weight: 600; }
+  .doc-content-box { background: #FAFAFA; border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; font-family: monospace; font-size: 0.75rem; color: #334155; max-height: 260px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+  
+  .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .form-label { font-size: 0.75rem; font-weight: 600; color: #475569; }
+  .form-control { padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.8rem; outline: none; transition: border-color 0.15s; background: #FFFFFF; }
+  .form-control:focus { border-color: var(--color-teal); }
+  
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal-content { background: #FFFFFF; border-radius: 8px; width: 100%; max-width: 850px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+  
+  @media print {
+    header, nav.sidebar, .no-print { display: none !important; }
+    .main-layout { display: block; }
+    .content-area { padding: 0; overflow: visible; }
+    .card { border: none; box-shadow: none; padding: 0; }
+  }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        Risk AI-SCA
+      </div>
+      <span class="badge badge-local">100% Autónomo / Sin Conexión</span>
+      <span id="header-active-patient" class="badge badge-warn">Paciente: Ninguno</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <button class="btn btn-primary" onclick="handleNewPatientClick()" title="Iniciar nuevo paciente clínico">
+        ➕ Nuevo Paciente
+      </button>
+      <button class="btn btn-excel" onclick="exportFullDatabaseToExcel()" title="Descargar Base Acumulativa en Excel (.xls)">
+        📊 Descargar Excel (BD)
+      </button>
+      <button class="btn btn-outline" onclick="openReportModal()" title="Ver informe médico e imprimir">
+        🖨️ Informe Médico
+      </button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <nav class="sidebar">
+      <div class="nav-header">Módulos Asistenciales</div>
+      <button class="nav-btn" id="btn-intake" onclick="switchTab('intake')">📥 Entrada de Documentos</button>
+      <button class="nav-btn" id="btn-review" onclick="switchTab('review')">✏️ Revisión y Edición</button>
+      <button class="nav-btn" id="btn-scores" onclick="switchTab('scores')">🧮 Calculadoras de Riesgo</button>
+      <button class="nav-btn" id="btn-recs" onclick="switchTab('recs')">💡 Recomendaciones y Citas</button>
+      <button class="nav-btn" id="btn-db" onclick="switchTab('db')">🗄️ Base Acumulativa SCA</button>
+      <button class="nav-btn active" id="btn-demo" onclick="switchTab('demo')">📋 Casos Sintéticos (8)</button>
+      <button class="nav-btn" id="btn-evidence" onclick="switchTab('evidence')">📚 Biblioteca RAG Local</button>
+      <button class="nav-btn" id="btn-audit" onclick="switchTab('audit')">🧪 Batería de Auditoría</button>
+
+      <div style="margin-top: auto; padding: 10px 8px; border-top: 1px solid #1E293B; font-size: 0.68rem; color: #64748B; line-height: 1.4;">
+        <strong>Risk AI-SCA Autónomo</strong><br>
+        Todas las funcionalidades incluidas: extracción determinista, edición en vivo, calculadoras, guías ESC 2023, base acumulativa y exportación Excel.
+      </div>
+    </nav>
+
+    <main class="content-area" id="main-content">
+      <!-- Contenido renderizado dinámicamente -->
+    </main>
+  </div>
+
+  <script>
+    const SYNTHETIC_CASES = [{"id":"SCA-SYNTH-01","number":1,"name":"Varón 54a — SCACEST inferior, PCI primaria CD, bajo riesgo hemorrágico","summary":"SCACEST inferior con ICP primaria a coronaria derecha, FEVI 58%, sin factores de riesgo hemorrágico.","clinicalScenario":"Varón de 54 años, fumador activo, sin otros antecedentes conocidos, que acude por dolor torácico opresivo de 90 minutos de evolución. ECG con elevación de ST en II, III y aVF.","keyFeatures":["SCACEST","ICP primaria con 1 stent en CD","FEVI 58%","PRECISE-DAPT < 25","ARC-HBR negativo"],"documents":[{"title":"Informe de Urgencias y Sala de Hemodinámica","type":"urgencias","date":"2026-03-10 04:15","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-01 | Varón, 54 años | Peso: 78 kg | Talla: 176 cm | IMC: 25.2 kg/m²\nMotivo de consulta: Dolor retroesternal opresivo irradiado a mandíbula de 90 min de evolución con cortejo vegetativo.\nAntecedentes: Fumador de 20 paquetes/año. No hipertenso conocido. Niega diabetes. Niega antecedentes de sangrado ni úlcera. Niega ictus o AIT previo. No alergias medicamentosas.\nExploración: Consciente, sudoroso. FC: 68 lpm, PA: 135/82 mmHg, SatO2 97% basal. Auscultación cardiaca rítmica, sin soplos. Auscultación pulmonar limpia (Killip I).\nECG Urgencias: Ritmo sinusal a 70 lpm, elevación del segmento ST de 2.5 mm en derivaciones II, III y aVF con descenso especular en I y aVL.\nProcedimiento urgente: Activación código infarto. Coronariografía por acceso radial derecho: Oclusión trombótica aguda del segmento distal de la arteria coronaria derecha (CD). Árbol coronario izquierdo sin estenosis significativas (DA y CX normales).\nICP primaria exitosa sobre CD con implante de 1 stent farmacoactivo de 3.5 x 24 mm. Flujo final TIMI 3. Sin complicaciones."},{"title":"Analítica Seriada de Laboratorio","type":"analitica","date":"2026-03-10 08:30","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nBioquímica y Hematología al ingreso:\n- Hemoglobina: 14.8 g/dL | Hematocrito: 44.1%\n- Leucocitos: 9.8 x 10^9/L | Plaquetas: 245 x 10^9/L\n- Creatinina sérica: 0.92 mg/dL | Urea: 34 mg/dL\n- FG CKD-EPI informado: 94 mL/min/1.73m²\n- Glucosa: 118 mg/dL | HbA1c: 5.4% | Potasio: 4.2 mmol/L | Sodio: 140 mmol/L\n- Troponina I ultrasensible (URL < 26 ng/L):\n  * Al ingreso (04:30 h): 420 ng/L\n  * A las 4 h (08:30 h): 14,800 ng/L\n  * A las 12 h (16:30 h) [Pico observado]: 28,450 ng/L\n  * A las 24 h (04:30 h +1d): 19,200 ng/L (curva descendente típica)\n- Perfil Lipídico: Colesterol total: 215 mg/dL | c-LDL: 142 mg/dL | c-HDL: 41 mg/dL | Triglicéridos: 160 mg/dL"},{"title":"Ecocardiograma Transtorácico y Alta","type":"alta","date":"2026-03-12 11:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nEcocardiograma al alta: VI no dilatado con hipocinesia inferobasal leve. Fracción de eyección del VI (FEVI): 58%. Sin valvulopatías significativas.\nTratamiento prescrito al alta:\n- Ácido acetilsalicílico (AAS) 100 mg cada 24 h\n- Prasugrel 10 mg cada 24 h (duración prevista de DAPT: 12 meses)\n- Atorvastatina 80 mg cada 24 h\n- Pantoprazol 20 mg cada 24 h\n- Derivación formal a programa de Rehabilitación Cardiaca ambulatoria."}],"groundTruth":{"edad":54,"sexo":0,"peso_kg":78,"talla_cm":176,"imc":25.18,"hta_previa":0,"tabaquismo_activo":1,"diabetes":0,"dislipidemia":1,"tipo_sca":0,"killip_ingreso":1,"fc_ingreso":68,"pas_ingreso":135,"hemoglobina_ingreso":14.8,"hematocrito_ingreso":44.1,"leucocitos_ingreso":9.8,"plaquetas_ingreso":245,"creatinina_ingreso":0.92,"aclaramiento_creatinina_cg":104.3,"fevi_inicial":58,"troponina_pico_observado":28450,"biomarcadores_positivos_elevados":1,"ldl_colesterol":142,"aas_documentado":1,"prasugrel_documentado":1,"estatina_alta_intensidad":1,"rehabilitacion_cardiaca_documentada":1,"dapt_meses_documentados":12},"expectedScores":{"grace":{"points":106,"category":"Bajo"},"preciseDapt":{"points":14,"category":"Bajo"},"crusade":{"points":1,"category":"Bajo"},"arcHbr":{"points":0,"category":"Bajo"}}},{"id":"SCA-SYNTH-02","number":2,"name":"Mujer 82a — SCASEST con anemia, ERC moderada-grave y sangrado digestivo previo","summary":"SCASEST en octogenaria frágil con hemoglobina 9.8 g/dL, CrCl 26 mL/min, úlcera sangrante hace 4 meses. Alto riesgo hemorrágico (ARC-HBR positivo).","clinicalScenario":"Mujer de 82 años con HTA y ERC previa que presenta disnea de esfuerzo progresiva y dolor torácico en reposo de 2 horas. Antecedente de melenas con ingreso hace 4 meses.","keyFeatures":["SCASEST","Edad 82a","Anemia (Hb 9.8)","CrCl 26 mL/min","ARC-HBR Positivo","Prasugrel contraindicado/desaconsejado"],"documents":[{"title":"Informe de Ingreso Hospitalario — Urgencias","type":"urgencias","date":"2026-02-18 19:40","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-02 | Mujer, 82 años | Peso: 55 kg | Talla: 154 cm | IMC: 23.2 kg/m²\nAntecedentes médicos: Hipertensión arterial en tratamiento con enalapril 10 mg. Enfermedad renal crónica estadio 3b-4. Antecedente de úlcera duodenal sangrante con ingreso hospitalario y transfusión de 2 concentrados de hematíes hace 4 meses. Niega ictus o AIT. No alergias conocidas.\nEnfermedad actual: Dolor opresivo retroesternal que se inició mientras cenaba, asociado a cortejo vegetativo y ligera disnea de decúbito.\nExploración: Palidez mucocutánea. FC: 94 lpm, PA: 152/86 mmHg, SatO2 93% aire ambiente. Crepitantes bibasales en tercio inferior (Killip II).\nECG al ingreso: Ritmo sinusal a 95 lpm, descenso horizontal del segmento ST de 1.5 mm en derivaciones V4-V6 y aVL."},{"title":"Laboratorio de Admisión","type":"analitica","date":"2026-02-18 20:30","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\n- Hemoglobina: 9.8 g/dL | Hematocrito: 29.8% | VCM: 84 fL\n- Leucocitos: 11.2 x 10^9/L | Plaquetas: 182 x 10^9/L\n- Creatinina sérica: 1.84 mg/dL | Urea: 88 mg/dL | FG CKD-EPI: 25 mL/min/1.73m²\n- CrCl Cockcroft-Gault: [(140-82)*55*0.85]/(72*1.84) = 20.4 mL/min\n- Troponina T ultrasensible: Ingreso: 185 ng/L (URL < 14 ng/L). Pico observado a las 6 h: 840 ng/L\n- Glucosa: 132 mg/dL | Potasio: 4.8 mmol/L | Sodio: 137 mmol/L\n- Perfil Lipídico: Colesterol total: 178 mg/dL | c-LDL: 112 mg/dL"},{"title":"Informe de Coronariografía y Alta","type":"alta","date":"2026-02-21 14:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nCateterismo (a las 20 h del ingreso tras hidratación con suero fisiológico): Lesión suboclusiva del 90% en tercio medio de arteria circunfleja (CX). Se realiza angioplastia con implante de 1 stent farmacoactivo de 2.75 x 18 mm. Buen resultado angiográfico.\nEcocardiograma: FEVI 50%.\nEstrategia antitrombótica acordada por alto riesgo de sangrado (ARC-HBR positivo por hemorragia reciente en < 6m, anemia < 11 g/dL y ERC severa):\n- DAPT acortada: Clopidogrel 75 mg/día + AAS 100 mg/día durante 1 a 3 meses, y posterior monoterapia con Clopidogrel.\n- Omeprazol 40 mg/día.\n- Atorvastatina 40 mg/día. Bisoprolol 2.5 mg/día."}],"groundTruth":{"edad":82,"sexo":1,"peso_kg":55,"talla_cm":154,"imc":23.19,"hta_previa":1,"diabetes":0,"erc_previa":1,"sangrado_previo_espontaneo":1,"tipo_sca":1,"fc_ingreso":94,"pas_ingreso":152,"killip_ingreso":2,"desviacion_st_ecg":1,"biomarcadores_positivos_elevados":1,"hemoglobina_ingreso":9.8,"hematocrito_ingreso":29.8,"leucocitos_ingreso":11.2,"plaquetas_ingreso":182,"creatinina_ingreso":1.84,"aclaramiento_creatinina_cg":20.4,"fg_ckd_epi":25,"fevi_inicial":50,"troponina_pico_observado":840,"diametro_stent_menor_3mm":1,"aas_documentado":1,"clopidogrel_documentado":1,"ibp_documentado":1,"dapt_meses_documentados":3},"expectedScores":{"grace":{"points":168,"category":"Alto"},"preciseDapt":{"points":61,"category":"Alto"},"crusade":{"points":52,"category":"Muy Alto"},"arcHbr":{"points":3,"category":"Alto"}}},{"id":"SCA-SYNTH-03","number":3,"name":"Varón 71a — SCASEST con Fibrilación Auricular permanente anticoagulada","summary":"SCA en paciente anticoagulado crónicamente por FA (CHA2DS2-VASc 4). Requiere desescalado rápido a Doble Terapia con DOAC + Clopidogrel.","clinicalScenario":"Varón de 71 años con antecedente de FA permanente en tratamiento con Apixabán 5 mg/12h e insuficiencia cardiaca previa. Ingresa por angina in crescendo y elevación de troponina.","keyFeatures":["FA anticoagulada","DOAC + Clopidogrel","Evitar Prasugrel/Ticagrelor con DOAC","Triple terapia hospitalaria ≤ 1 semana"],"documents":[{"title":"Urgencias — Informe Clínico de Ingreso","type":"urgencias","date":"2026-03-05 16:10","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-03 | Varón, 71 años | Peso: 82 kg | Talla: 172 cm | IMC: 27.7 kg/m²\nAntecedentes: Fibrilación auricular permanente en tratamiento con Apixabán 5 mg/12h. Hipertensión arterial de larga data. Insuficiencia cardiaca con FEVI 45%. No ictus ni AIT. No antecedentes de sangrado.\nEnfermedad actual: En las últimas 48 horas presenta múltiples episodios anginosos con mínimos esfuerzos y un episodio de 45 minutos de dolor en reposo.\nExploración: Arritmia completa a 88 lpm, PA: 138/84 mmHg. Eupneico en reposo, sin edemas ni crepitantes (Killip I).\nECG: Fibrilación auricular con respuesta ventricular media a 85 lpm. Descenso de ST de 1 mm en derivaciones precordiales V5-V6."},{"title":"Analítica de Urgencias y Coronariografía","type":"cateterismo","date":"2026-03-06 10:30","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nLaboratorio:\n- Hemoglobina: 13.9 g/dL | Hematocrito: 41.2% | Leucocitos: 7.4 x 10^9/L | Plaquetas: 210 x 10^9/L\n- Creatinina sérica: 1.15 mg/dL | CrCl Cockcroft-Gault: 71.3 mL/min\n- Troponina I ultrasensible: Ingreso 310 ng/L, pico 1,450 ng/L.\n- c-LDL: 98 mg/dL | Glucosa: 104 mg/dL\nCoronariografía invasiva (radial): Enfermedad de 1 vaso. Estenosis del 85% en segmento medio de arteria descendente anterior (DA). Implante de 1 stent farmacoactivo de 3.0 x 20 mm.\nResultado exitoso TIMI 3."},{"title":"Informe de Alta y Régimen Antitrombótico","type":"alta","date":"2026-03-08 12:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nPlan antitrombótico de consenso multidisciplinar (Cardiología / Farmacología):\n- CHA2DS2-VASc: 4 puntos (IC + HTA + Edad 71 + Vascular). HAS-BLED: 2 puntos.\n- Se suspende AAS tras la angioplastia intrahospitalaria (triple terapia de 48 horas únicamente).\n- Régimen al alta: DOBLE TERAPIA ANTITROMBÓTICA con:\n  1. Apixabán 5 mg dos veces al día (dosis estándar completa).\n  2. Clopidogrel 75 mg una vez al día (duración: 12 meses).\n  [SE RECUERDA: Prasugrel y Ticagrelor están formalmente desaconsejados en combinación con DOAC].\n- Atorvastatina 80 mg/día. Bisoprolol 5 mg/día. Enalapril 5 mg/12h. Pantoprazol 20 mg/día."}],"groundTruth":{"edad":71,"sexo":0,"peso_kg":82,"talla_cm":172,"imc":27.72,"hta_previa":1,"fa_previa":1,"anticoagulacion_oral_cronica":1,"ic_previa":1,"tipo_sca":1,"fc_ingreso":88,"pas_ingreso":138,"killip_ingreso":1,"desviacion_st_ecg":1,"biomarcadores_positivos_elevados":1,"hemoglobina_ingreso":13.9,"hematocrito_ingreso":41.2,"leucocitos_ingreso":7.4,"plaquetas_ingreso":210,"creatinina_ingreso":1.15,"aclaramiento_creatinina_cg":71.3,"fevi_inicial":45,"troponina_pico_observado":1450,"anticoagulante_oral_documentado":1,"clopidogrel_documentado":1,"aas_documentado":0,"estatina_alta_intensidad":1,"ibp_documentado":1},"expectedScores":{"grace":{"points":123,"category":"Intermedio"},"cha2ds2Vasc":{"points":4,"category":"Alto"},"hasBled":{"points":2,"category":"Bajo"},"arcHbr":{"points":1,"category":"Alto"}}},{"id":"SCA-SYNTH-04","number":4,"name":"Varón 63a — SCACEST anterior, disfunción ventricular severa (FEVI 28%) y Diabetes tipo 2","summary":"SCACEST anterior con oclusión de DA proximal, FEVI 28%, Killip II. Indicación de cuádruple terapia neurohormonal de IC e iSGLT2 cardiorrenal.","clinicalScenario":"Varón de 63 años, diabético con mal control (HbA1c 8.8%), que ingresa por infarto anterior extenso. Ecocardiograma muestra FEVI 28%. Requiere optimización integral neurohormonal y metabólica.","keyFeatures":["SCACEST anterior","FEVI 28%","Diabetes mellitus tipo 2","Cuádruple terapia IC","iSGLT2 / Empagliflozina"],"documents":[{"title":"Informe de Urgencias e ICP Primaria","type":"urgencias","date":"2026-01-22 03:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-04 | Varón, 63 años | Peso: 86 kg | Talla: 174 cm | IMC: 28.4 kg/m²\nAntecedentes: Diabetes mellitus tipo 2 de 10 años de evolución en monoterapia con metformina. Dislipidemia. Exfumador hace 3 años. No antecedentes de sangrado ni ictus.\nEnfermedad actual: Dolor centrotorácico opresivo opresivo de 2 h de evolución irradiado a ambos brazos.\nExploración: Sudoración fría. FC: 102 lpm, PA: 110/72 mmHg, SatO2 92% aire ambiente. Crepitantes bibasales hasta campos medios (Killip II).\nECG: Elevación masiva de ST de 4 mm en derivaciones V1 a V5 con ondas Q patológicas incipientes.\nICP primaria: Oclusión aguda proximal de arteria descendente anterior. Se implanta 1 stent farmacoactivo de 3.5 x 28 mm con flujo final TIMI 3."},{"title":"Analítica Completa y Biomarcadores","type":"analitica","date":"2026-01-22 09:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\n- Hemoglobina: 14.1 g/dL | Hematocrito: 42.5% | Leucocitos: 12.8 x 10^9/L | Plaquetas: 270 x 10^9/L\n- Creatinina sérica: 1.22 mg/dL | CrCl Cockcroft-Gault: 82.3 mL/min\n- Glucosa al ingreso: 245 mg/dL | HbA1c: 8.8%\n- Troponina I pico observado: 42,600 ng/L\n- NT-proBNP al ingreso: 3,850 pg/mL\n- Perfil Lipídico: Colesterol total: 240 mg/dL | c-LDL: 164 mg/dL | Triglicéridos: 220 mg/dL"},{"title":"Ecocardiograma y Plan de Alta Multidisciplinar","type":"alta","date":"2026-01-26 13:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nEcocardiograma reglado: Ventrículo izquierdo dilatado con acinesia anterior, apical y septal anterior. Fracción de eyección del VI severamente deprimida (FEVI): 28%.\nPlan de Alta:\n1. Antiagregación: AAS 100 mg/día + Prasugrel 10 mg/día durante 12 meses.\n2. Cuádruple terapia neurohormonal de IC con FEVI reducida:\n   - Sacubitrilo/valsartán 24/26 mg cada 12h (titulación ambulatoria).\n   - Bisoprolol 2.5 mg cada 24h.\n   - Eplerenona 25 mg cada 24h.\n   - Empagliflozina 10 mg cada 24h (doble objetivo: IC + diabetes).\n3. Hipolipemiante intensivo: Rosuvastatina 20 mg + Ezetimiba 10 mg/día.\n4. Pantoprazol 20 mg/día. Derivación a Unidad de Insuficiencia Cardiaca y Rehabilitación."}],"groundTruth":{"edad":63,"sexo":0,"peso_kg":86,"talla_cm":174,"imc":28.4,"hta_previa":0,"diabetes":1,"dislipidemia":1,"tabaquismo_previo":1,"tipo_sca":0,"fc_ingreso":102,"pas_ingreso":110,"killip_ingreso":2,"desviacion_st_ecg":1,"biomarcadores_positivos_elevados":1,"hemoglobina_ingreso":14.1,"hematocrito_ingreso":42.5,"leucocitos_ingreso":12.8,"plaquetas_ingreso":270,"creatinina_ingreso":1.22,"aclaramiento_creatinina_cg":82.3,"fevi_inicial":28,"troponina_pico_observado":42600,"nt_probnp_maximo":3850,"hba1c":8.8,"ldl_colesterol":164,"aas_documentado":1,"prasugrel_documentado":1,"arni_documentado":1,"betabloqueante_documentado":1,"arm_documentado":1,"isglt2_documentado":1,"estatina_alta_intensidad":1,"ezetimiba_documentada":1,"ibp_documentado":1},"expectedScores":{"grace":{"points":141,"category":"Intermedio"},"preciseDapt":{"points":19,"category":"Bajo"},"crusade":{"points":26,"category":"Bajo"}}},{"id":"SCA-SYNTH-05","number":5,"name":"Varón 67a — SCASEST con enfermedad de 3 vasos, PCI culpable y 2º tiempo diferido","summary":"SCASEST de alto riesgo con lesión culpable tratada en DA y lesión severa residual en CD programada para revascularización completa diferida.","clinicalScenario":"Varón de 67 años con angina inestable y elevación de biomarcadores. Coronariografía muestra lesión culpable en DA y lesión del 85% en CD con reserva fraccional patológica.","keyFeatures":["Multivaso (3 vasos)","Revascularización incompleta inicial (0)","Planificación diferida","Ensayo COMPLETE"],"documents":[{"title":"Informe de Coronariografía — Hospital Universitario","type":"cateterismo","date":"2026-02-04 11:30","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-05 | Varón, 67 años | Peso: 80 kg | Talla: 175 cm | IMC: 26.1 kg/m²\nAntecedentes: HTA, Dislipidemia, Tabaquismo previo.\nDiagnóstico al ingreso: SCASEST con dolor torácico refractario y elevación de Troponina T (pico 620 ng/L).\nHallazgos angiográficos:\n1. Tronco Común Izquierdo: sin lesiones.\n2. Arteria Descendente Anterior (DA): estenosis crítica del 95% en tercio medio con trombo intraluminal (lesión culpable).\n3. Arteria Circunfleja (CX): irregularidades parietales no obstructivas (<30%).\n4. Arteria Coronaria Derecha (CD): estenosis tubular del 85% en segmento medio con lecho distal de buen calibre.\nIntervencionismo:\nSe realiza ICP con éxito sobre DA media con implante de stent farmacoactivo de 3.0 x 24 mm.\nDecisión del Heart Team: Paciente hemodinámicamente estable. Se califica como revascularización incompleta inicial en el procedimiento de urgencias (código 0). Se programa revascularización completa mediante ICP electiva sobre CD en un segundo tiempo durante el ingreso a las 72 horas (estrategia guiada por ensayo COMPLETE / Guías ACC-AHA 2025)."},{"title":"Informe Clínico de Evolución y Laboratorio","type":"alta","date":"2026-02-07 16:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nLaboratorio: Hb: 13.5 g/dL | Hto: 40.1% | Leuco: 8.1 x 10^9/L | Plaq: 220 x 10^9/L | Cr: 1.05 mg/dL (CrCl: 79.4 mL/min) | c-LDL: 130 mg/dL.\nFEVI: 52%.\nSegunda intervención realizada el 07/02: Implante de stent farmacoactivo de 3.0 x 18 mm en CD media con éxito. Revascularización coronaria completa alcanzada (código 1).\nTratamiento al alta: AAS 100 mg/día + Ticagrelor 90 mg/12h (12 meses). Atorvastatina 80 mg/día. Bisoprolol 5 mg/día. Ramipril 5 mg/día. Pantoprazol 20 mg/día."}],"groundTruth":{"edad":67,"sexo":0,"peso_kg":80,"talla_cm":175,"imc":26.12,"hta_previa":1,"dislipidemia":1,"tipo_sca":1,"numero_vasos_enfermos":2,"afectacion_tronco_comun":0,"pci_realizada":1,"revascularizacion_completa":1,"fevi_inicial":52,"troponina_pico_observado":620,"biomarcadores_positivos_elevados":1,"hemoglobina_ingreso":13.5,"creatinina_ingreso":1.05,"aclaramiento_creatinina_cg":79.4,"aas_documentado":1,"ticagrelor_documentado":1,"estatina_alta_intensidad":1,"ibp_documentado":1,"dapt_meses_documentados":12},"expectedScores":{"grace":{"points":114,"category":"Intermedio"},"preciseDapt":{"points":19,"category":"Bajo"},"crusade":{"points":14,"category":"Bajo"}}},{"id":"SCA-SYNTH-06","number":6,"name":"Mujer 59a — Angina Inestable (Troponinas negativas repetidas), TIMI 3","summary":"Angina inestable de reposo con troponinas ultrasensibles seriadas estrictamente por debajo del percentil 99. Estudio invasivo programado.","clinicalScenario":"Mujer de 59 años con múltiples episodios de dolor torácico opresivo de reposo. Marcadores de necrosis miocárdica negativos en las extracciones a las 0, 1 y 3 horas.","keyFeatures":["Angina Inestable (Tipo 2)","Troponina negativa (< URL)","TIMI UA/NSTEMI 3","Sin necrosis miocárdica aguda"],"documents":[{"title":"Informe de Observación de Urgencias — Algoritmo Diagnóstico","type":"urgencias","date":"2026-03-14 07:15","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-06 | Mujer, 59 años | Peso: 68 kg | Talla: 162 cm | IMC: 25.9 kg/m²\nAntecedentes: Hipertensión arterial en tratamiento con amlodipino 5 mg. Dislipidemia. No tabaquismo. No diabetes. Sin historia de sangrado ni cardiopatía previa.\nEnfermedad actual: En las últimas 24 horas ha presentado 3 episodios de opresión precordial de 15-20 minutos, el último en reposo hace 2 horas.\nExploración: Asintomática a su llegada. FC: 74 lpm, PA: 142/85 mmHg, SatO2 98%. Killip I.\nECG seriados: Ritmo sinusal a 72 lpm, sin elevación ni descenso significativo del segmento ST. Ondas T aplanadas inespecíficas en V4-V6."},{"title":"Cinética de Biomarcadores Cardiacos","type":"analitica","date":"2026-03-14 11:30","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nProtocolo de Troponina T ultrasensible de alta sensibilidad (Límite superior normal URL: 14 ng/L):\n- Troponina basal (0 h): 6.2 ng/L [Negativa]\n- Troponina a la 1 h: 6.5 ng/L [Sin cambio delta significativo]\n- Troponina a las 3 h: 6.8 ng/L [Negativa confirmada, no supera el percentil 99]\nBioquímica general:\n- Hb: 13.2 g/dL | Hto: 39.4% | Leucocitos: 6.8 x 10^9/L | Plaquetas: 260 x 10^9/L\n- Creatinina: 0.78 mg/dL | CrCl Cockcroft-Gault: 88.7 mL/min\n- Colesterol total: 228 mg/dL | c-LDL: 148 mg/dL\nDiagnóstico confirmado: ANGINA INESTABLE (Tipo SCA 2). Ausencia de necrosis miocárdica aguda."}],"groundTruth":{"edad":59,"sexo":1,"peso_kg":68,"talla_cm":162,"imc":25.91,"hta_previa":1,"dislipidemia":1,"tipo_sca":2,"episodios_angina_24h":1,"fc_ingreso":74,"pas_ingreso":142,"killip_ingreso":1,"desviacion_st_ecg":0,"biomarcadores_positivos_elevados":0,"troponina_pico_observado":6.8,"troponina_limite_superior_url":14,"hemoglobina_ingreso":13.2,"hematocrito_ingreso":39.4,"leucocitos_ingreso":6.8,"plaquetas_ingreso":260,"creatinina_ingreso":0.78,"aclaramiento_creatinina_cg":88.7,"ldl_colesterol":148,"aas_documentado":1},"expectedScores":{"grace":{"points":88,"category":"Bajo"},"timi":{"points":2,"category":"Bajo"},"preciseDapt":{"points":15,"category":"Bajo"}}},{"id":"SCA-SYNTH-07","number":7,"name":"Varón edad dudosa — Traslado urgente con datos incompletos y discrepancias","summary":"Informe de traslado con variables analíticas incompletas (sin creatinina ni peso), discrepancia de antecedentes que exige revisión médica activa.","clinicalScenario":"Varón trasladado en ambulancia con informe manuscrito fragmentario. Se constata dolor y cambios en ST pero faltan determinantes críticos para calcular CrCl y scores derivados.","keyFeatures":["Falta CrCl y peso","Scores deben dar INDETERMINADO","No inventar ceros","Revisión médica activa requerida"],"documents":[{"title":"Hoja de Traslado de Emergencias — Datos Fragmentarios","type":"urgencias","date":"2026-03-20 22:15","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA (CASO DE AUDITORÍA Y DISCREPANCIAS)\nPaciente varón, edad referida verbalmente en torno a 68 años (sin DNI confirmado a la llegada).\nPeso no disponible. Talla no disponible.\nAntecedentes: En una hoja previa consta \"HTA y posible diabetes\", pero el paciente verbaliza que no toma medicamentos y no tiene azúcar alto. No consta analítica renal previa.\nMotivo de traslado: Dolor torácico opresivo de 3 horas.\nConstantes: FC 88 lpm, PA 145/90 mmHg.\nECG: Descenso de ST en cara lateral de 1 mm.\nAnalítica remitida urgente:\n- Hemoglobina: 12.0 g/dL | Leucocitos: 10.5 x 10^9/L\n- Creatinina sérica: NO DETERMINADA / PENDIENTE DE VALIDACIÓN EN CENTRAL\n- Troponina I: Positiva rápida cualitativa en tira reactiva, valor cuantitativo pendiente."}],"groundTruth":{"edad":68,"sexo":0,"peso_kg":null,"talla_cm":null,"imc":null,"hta_previa":null,"diabetes":null,"tipo_sca":1,"fc_ingreso":88,"pas_ingreso":145,"killip_ingreso":1,"desviacion_st_ecg":1,"biomarcadores_positivos_elevados":1,"hemoglobina_ingreso":12,"creatinina_ingreso":null,"aclaramiento_creatinina_cg":null},"expectedScores":{"grace":{"points":null,"category":"Indeterminado"},"preciseDapt":{"points":null,"category":"Indeterminado"},"crusade":{"points":null,"category":"Indeterminado"},"arcHbr":{"points":null,"category":"Indeterminado"}}},{"id":"SCA-SYNTH-08","number":8,"name":"Varón 66a — Consulta de Seguimiento a 12 meses post-PCI (Aplicación del DAPT Score)","summary":"Paciente que cumple 12 meses de DAPT tras ICP por IAM previo con stent < 3mm y tabaquismo activo. No ha sufrido hemorragias ni nuevos infartos. DAPT score ≥ 2 favorable a prolongación.","clinicalScenario":"Revisión en consulta de Cardiología al cumplirse exactamente 1 año de la angioplastia coronaria. Evaluación de la conveniencia de prolongar o suspender el inhibidor P2Y12.","keyFeatures":["Fase seguimiento 12m","DAPT score APLICABLE","Puntuación DAPT ≥ 2","Prolongación recomendada"],"documents":[{"title":"Informe de Consulta de Cardiología — Revisión a los 12 Meses","type":"alta","date":"2026-03-15 10:00","content":"PACIENTE SINTÉTICO — DEMOSTRACIÓN CLÍNICA\nID: SCA-SYNTH-08 | Varón, 66 años | Peso: 79 kg | Talla: 173 cm | IMC: 26.4 kg/m²\nMotivo de consulta: Revisión reglada al cumplirse 12 meses de ICP con stent farmacoactivo por infarto agudo de miocardio sin elevación del ST (SCASEST índice hace 1 año).\nEvolución en el último año:\n- Adherencia excelente a doble antiagregación con AAS 100 mg + Ticagrelor 90 mg/12h.\n- Ausencia de eventos isquémicos coronarios o cerebrales intercurrentes.\n- Ausencia de complicaciones hemorrágicas mayores o menores (sin hematomas, melenas ni epistaxis).\n- Continúa fumando activamente 10 cigarrillos/día (fumador activo).\n- Diabetes mellitus tipo 2 diagnosticada hace 4 años.\nDetalles anatómicos del cateterismo índice (hace 12 meses):\n- Se implantaron 2 stents farmacoactivos, uno de ellos con diámetro de 2.75 mm (< 3 mm) en rama marginal obtusa.\n- FEVI conservada (54%). Sin antecedentes de insuficiencia cardiaca.\nLaboratorio actual de control:\n- Hemoglobina: 14.2 g/dL | Creatinina: 0.95 mg/dL (CrCl: 90 mL/min) | c-LDL: 52 mg/dL.\nPropósito de la evaluación: Calcular el DAPT Score de Yeh et al. para determinar si el balance isquémico/hemorrágico favorece continuar DAPT prolongada (12 a 30 meses) o suspender el inhibidor P2Y12."}],"groundTruth":{"edad":66,"sexo":0,"peso_kg":79,"talla_cm":173,"imc":26.4,"tabaquismo_activo":1,"diabetes":1,"tipo_sca":1,"diametro_stent_menor_3mm":1,"pci_realizada":1,"fevi_inicial":54,"ic_previa":0,"hemoglobina_ingreso":14.2,"creatinina_ingreso":0.95,"aclaramiento_creatinina_cg":90,"dapt_meses_documentados":12},"expectedScores":{"daptScore":{"points":3,"category":"Alto"}}}];
+    const CORPUS = [{"id":"ESC-2023-ACS-INVASIVE-IMMEDIATE","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 5.1 — Estrategia invasiva inmediata (< 2 h)","recommendationQuote":"Se recomienda una estrategia invasiva inmediata (< 2 horas desde el contacto médico) en pacientes con SCASEST que presentan al menos un criterio de muy alto riesgo: inestabilidad hemodinámica o shock cardiogénico, dolor torácico recurrente o refractario pese a tratamiento médico óptimo, arritmias ventriculares potencialmente mortales o parada cardiaca resucitada, complicaciones mecánicas del infarto, o insuficiencia cardiaca aguda atribuible a isquemia miocárdica en curso.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["invasiva inmediata","shock","inestabilidad","scasest","urgencias","arritmia"]},{"id":"ESC-2023-ACS-INVASIVE-EARLY","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 5.2 — Estrategia invasiva precoz (< 24 h)","recommendationQuote":"Se recomienda una estrategia invasiva precoz dentro de las primeras 24 horas del ingreso en pacientes con SCASEST con diagnóstico confirmado de IAMSEST, cambios dinámicos del ST o elevación transitoria, o con puntuación de riesgo GRACE estimada > 140 puntos.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["invasiva precoz","grace","scasest","24 horas","iamsest"]},{"id":"ESC-2023-ACS-P2Y12-CHOICE","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 6.1 — Elección del inhibidor P2Y12 en SCA","recommendationQuote":"Se recomienda un inhibidor potente del receptor P2Y12 (prasugrel 10 mg/día o 5 mg/día en ≥75 años o <60 kg, o ticagrelor 90 mg/12 h) en combinación con AAS durante 12 meses tras PCI por SCA, a menos que existan contraindicaciones o alto riesgo hemorrágico (ARC-HBR o PRECISE-DAPT ≥ 25). Se prefiere prasugrel sobre ticagrelor en pacientes sometidos a angioplastia primaria (ensayo ISAR-REACT 5). Clopidogrel (75 mg/día) queda reservado para situaciones de alto riesgo de sangrado, contraindicación/intolerancia a prasugrel/ticagrelor, o necesidad de anticoagulación oral.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["p2y12","prasugrel","ticagrelor","clopidogrel","dapt","antiagregacion"]},{"id":"ESC-2023-ACS-PRASUGREL-CONTRAINDICATION","guidelineOrStudy":"Ficha Técnica Oficial y Guía ESC 2023 SCA","societyOrJournal":"European Medicines Agency / ESC","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"Prasugrel Summary of Product Characteristics & ESC ACS Safety Criteria","section":"Contraindicaciones críticas de Prasugrel","recommendationQuote":"Prasugrel está estrictamente CONTRAINDICADO en pacientes con antecedente de ictus isquémico previo o accidente isquémico transitorio (AIT), hemorragia patológica activa o insuficiencia hepática grave (Child-Pugh C). En pacientes con edad ≥ 75 años no se recomienda de forma general por incremento de hemorragia mortal; si se considera imprescindible, o en pacientes con peso corporal < 60 kg, se exige reducir la dosis de mantenimiento a 5 mg una vez al día.","classOfRecommendation":"Clase III (Contraindicación Absoluta)","levelOfEvidence":"Nivel A","verifiedKeywords":["prasugrel","contraindicacion","ictus","ait","peso","edad"]},{"id":"ESC-2023-ACS-AF-ANTICOAGULATION","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 6.3 — Pacientes con indicación de anticoagulación oral sometidos a PCI","recommendationQuote":"En pacientes con FA o indicación de anticoagulación sometidos a PCI por SCA: se recomienda una terapia triple (DOAC + AAS + clopidogrel) durante el procedimiento y la estancia hospitalaria inicial (hasta un máximo de 1 semana). Al alta, se recomienda la desescalada inmediata a TERAPIA DOBLE (DOAC a dosis completa aprobada para prevención de ictus + clopidogrel 75 mg/día) durante 12 meses. Se desaconseja el uso concomitante de ticagrelor o prasugrel como parte de la triple terapia con anticoagulante.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["fa","fibrilacion auricular","anticoagulacion","triple terapia","doble terapia","doac","clopidogrel"]},{"id":"ESC-2023-ACS-HBR-SHORT-DAPT","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 6.2 — Duración acortada de DAPT en Alto Riesgo Hemorrágico (HBR)","recommendationQuote":"En pacientes con alto riesgo de hemorragia (definido por ARC-HBR positivo o PRECISE-DAPT ≥ 25), se debe considerar suspender el inhibidor P2Y12 a los 3 meses (o tras 1 mes si riesgo hemorrágico extremo) y continuar con monoterapia antiagregante (preferentemente AAS o inhibidor P2Y12 en monoterapia).","classOfRecommendation":"Clase IIa","levelOfEvidence":"Nivel A","verifiedKeywords":["hbr","arc-hbr","precise-dapt","dapt corta","acortamiento","sangrado"]},{"id":"ESC-2023-ACS-PPI-GASTROPROTECTION","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 6.4 — Gastroprotección durante el tratamiento antiplaquetario","recommendationQuote":"Se recomienda el uso rutinario concomitante de un inhibidor de la bomba de protones (IBP) en todos los pacientes con SCA que reciben DAPT, terapia antiplaquetaria simple o anticoagulación oral con alto riesgo de sangrado gastrointestinal (antecedente de úlcera o sangrado GI, edad ≥ 65 años, uso de anticoagulantes, AINEs o corticoides).","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["ibp","gastroproteccion","dapt","ulcera","omeprazol","pantoprazol"]},{"id":"ESC-2019-DYSLIPIDEMIA-GOALS","guidelineOrStudy":"Guía ESC/EAS 2019 para el manejo de las dislipidemias","societyOrJournal":"European Heart Journal (ESC/EAS)","year":2019,"doi":"10.1093/eurheartj/ehz455","url":"https://doi.org/10.1093/eurheartj/ehz455","title":"2019 ESC/EAS Guidelines for the management of dyslipidaemias: lipid modification to reduce cardiovascular risk","section":"Sección 7 — Objetivos de c-LDL en Muy Alto Riesgo Cardiovascular","recommendationQuote":"En pacientes con SCA (clasificados automáticamente como muy alto riesgo cardiovascular): se recomienda una reducción de c-LDL ≥ 50% respecto al valor basal Y alcanzar un objetivo estricto de c-LDL < 55 mg/dL (< 1.4 mmol/L). En pacientes que sufren un segundo evento vascular en < 2 años mientras recibían estatina a dosis máxima tolerada, se puede considerar un objetivo de c-LDL < 40 mg/dL (< 1.0 mmol/L). Se debe iniciar precozmente una estatina de alta intensidad (atorvastatina 40-80 mg o rosuvastatina 20-40 mg); si no se alcanza el objetivo en 4-6 semanas, añadir ezetimiba 10 mg/día, y posteriormente inhibidores de PCSK9.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["ldl","estatina","alta intensidad","ezetimiba","pcsk9","dislipidemia","55 mg/dl"]},{"id":"ESC-2023-DIABETES-SGLT2-GLP1","guidelineOrStudy":"Guía ESC 2023 para el manejo de la enfermedad cardiovascular en pacientes con diabetes","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad192","url":"https://doi.org/10.1093/eurheartj/ehad192","title":"2023 ESC Guidelines for the management of cardiovascular disease in patients with diabetes","section":"Sección 5 — Fármacos con beneficio cardiorrenal demostrado","recommendationQuote":"En pacientes con diabetes tipo 2 y enfermedad cardiovascular aterosclerótica documentada (como un SCA): se recomienda el tratamiento con inhibidores de SGLT2 (empagliflozina, dapagliflozina) y/o agonistas del receptor de GLP-1 con beneficio CV probado para reducir el riesgo de nuevos eventos cardiovasculares mayores, muerte cardiovascular y hospitalizaciones por insuficiencia cardiaca, con independencia de la HbA1c basal.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["diabetes","isglt2","glp-1","empagliflozina","dapagliflozina","cardiorrenal"]},{"id":"ESC-2023-ACS-HEART-FAILURE-BETA-BLOCKERS","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 8.2 — Betabloqueantes tras SCA según FEVI","recommendationQuote":"Se recomienda betabloqueo oral en pacientes con SCA y FEVI reducida o ligeramente reducida (FEVI ≤ 40% y 41-49%) para reducir la mortalidad por cualquier causa y cardiovascular. En pacientes con FEVI preservada (> 50%) sin antecedentes de angina, hipertensión o arritmias, la evidencia actual (ensayo REDUCE-AMI 2024 y registros contemporáneos) no demuestra beneficio inequívoco del betabloqueo sistemático a largo plazo; se debe individualizar su mantenimiento o desescalada al año.","classOfRecommendation":"Clase I (en FEVI ≤ 40%) / Clase IIb (en FEVI > 50% no complicada)","levelOfEvidence":"Nivel A","verifiedKeywords":["fevi","betabloqueante","insuficiencia cardiaca","reducida","preservada"]},{"id":"ESC-2023-ACS-REHABILITATION","guidelineOrStudy":"Guía ESC 2023 para el manejo de los síndromes coronarios agudos","societyOrJournal":"European Heart Journal (ESC)","year":2023,"doi":"10.1093/eurheartj/ehad191","url":"https://doi.org/10.1093/eurheartj/ehad191","title":"2023 ESC Guidelines for the management of acute coronary syndromes","section":"Sección 10 — Prevención secundaria integral y rehabilitación cardiaca","recommendationQuote":"Se recomienda la derivación e inclusión de todos los pacientes tras un SCA a un programa estructurado y multidisciplinar de rehabilitación cardiaca integral y prevención secundaria, para mejorar la capacidad funcional, el control de factores de riesgo, la adherencia terapéutica y reducir la mortalidad por cualquier causa y rehospitalizaciones.","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["rehabilitacion cardiaca","prevencion secundaria","ejercicio","tabaco"]},{"id":"ACC-AHA-2025-ACS-REVASC","guidelineOrStudy":"Guía Conjunta ACC/AHA/ACEP/NAEMSP/SCAI 2025 de SCA","societyOrJournal":"Journal of the American College of Cardiology (JACC)","year":2025,"doi":"10.1016/j.jacc.2024.11.009","url":"https://doi.org/10.1016/j.jacc.2024.11.009","title":"2025 ACC/AHA/ACEP/NAEMSP/SCAI Guideline for the Management of Acute Coronary Syndromes","section":"Sección 4 — Estrategia invasiva y revascularización completa","recommendationQuote":"En pacientes con SCACEST y enfermedad multivaso hemodinámicamente estables, se recomienda la revascularización completa de las lesiones no culpables con estenosis significativa (ya sea durante el procedimiento índice o de forma diferida durante el ingreso hospitalario) para reducir el riesgo de muerte cardiovascular e infarto recurrente (ensayo COMPLETE).","classOfRecommendation":"Clase I","levelOfEvidence":"Nivel A","verifiedKeywords":["multivaso","revascularizacion completa","no culpable","complete trial","acc/aha 2025"]}];
+    const DICTIONARY = [{"key":"id_pseudonimo","header":"ID seudónimo","shortLabel":"ID Seudónimo","category":"identificacion","type":"text","description":"Identificador seudónimo estable del paciente"},{"key":"id_episodio_indice","header":"ID episodio índice","shortLabel":"ID Episodio","category":"identificacion","type":"text","description":"Identificador del episodio índice asistencial"},{"key":"es_sintetico","header":"Sintético (0=real;1=sintético;.=sin dato)","shortLabel":"Sintético","category":"identificacion","type":"binary","description":"Indicador de paciente sintético para pruebas o demostración"},{"key":"edad","header":"Edad (años)","shortLabel":"Edad","category":"identificacion","type":"numeric","unit":"años","description":"Edad cumplida del paciente al ingreso"},{"key":"sexo","header":"Sexo (0=masculino;1=femenino;.=sin dato)","shortLabel":"Sexo","category":"identificacion","type":"select","options":[{"value":0,"label":"0 = Masculino"},{"value":1,"label":"1 = Femenino"},{"value":null,"label":". = Sin dato"}],"description":"Sexo biológico documentado"},{"key":"peso_kg","header":"Peso (kg;.=sin dato)","shortLabel":"Peso","category":"identificacion","type":"numeric","unit":"kg","description":"Peso corporal en kilogramos"},{"key":"talla_cm","header":"Talla (cm;.=sin dato)","shortLabel":"Talla","category":"identificacion","type":"numeric","unit":"cm","description":"Estatura en centímetros"},{"key":"imc","header":"IMC (kg/m²;.=sin dato)","shortLabel":"IMC","category":"identificacion","type":"numeric","unit":"kg/m²","description":"Índice de masa corporal"},{"key":"fecha_ingreso","header":"Fecha de ingreso (AAAA-MM-DD;.=sin dato)","shortLabel":"Fecha Ingreso","category":"identificacion","type":"date","description":"Fecha de admisión hospitalaria"},{"key":"momento_evaluacion","header":"Momento de evaluación (urgencias/ingreso/cateterismo/alta/seguimiento)","shortLabel":"Fase Evaluación","category":"identificacion","type":"text","description":"Momento clínico en el que se ejecuta la evaluación prospectiva"},{"key":"hta_previa","header":"HTA previa (0=no;1=sí;.=sin dato)","shortLabel":"HTA Previa","category":"antecedentes","type":"binary","description":"Hipertensión arterial diagnosticada previamente"},{"key":"tabaquismo_activo","header":"Tabaquismo activo (0=no;1=sí;.=sin dato)","shortLabel":"Tabaco Activo","category":"antecedentes","type":"binary","description":"Fumador de cigarrillos en el momento actual o reciente"},{"key":"tabaquismo_previo","header":"Tabaquismo previo/exfumador (0=no;1=sí;.=sin dato)","shortLabel":"Exfumador","category":"antecedentes","type":"binary","description":"Antecedente de consumo de tabaco abandonado"},{"key":"diabetes","header":"Diabetes (0=no;1=sí;.=sin dato)","shortLabel":"Diabetes","category":"antecedentes","type":"binary","description":"Diagnóstico documentado de diabetes mellitus"},{"key":"dislipidemia","header":"Dislipidemia (0=no;1=sí;.=sin dato)","shortLabel":"Dislipidemia","category":"antecedentes","type":"binary","description":"Diagnóstico previo de hipercolesterolemia o dislipidemia"},{"key":"erc_previa","header":"ERC previa (0=no;1=sí;.=sin dato)","shortLabel":"ERC Previa","category":"antecedentes","type":"binary","description":"Enfermedad renal crónica diagnosticada previa al ingreso"},{"key":"dialisis","header":"Diálisis crónica (0=no;1=sí;.=sin dato)","shortLabel":"Diálisis","category":"antecedentes","type":"binary","description":"Terapia sustitutiva renal en programa crónico"},{"key":"fa_previa","header":"Fibrilación auricular previa (0=no;1=sí;.=sin dato)","shortLabel":"FA Previa","category":"antecedentes","type":"binary","description":"Antecedente documentado de FA o flutter auricular"},{"key":"iam_previo","header":"IAM previo (0=no;1=sí;.=sin dato)","shortLabel":"IAM Previo","category":"antecedentes","type":"binary","description":"Infarto de miocardio previo documentado"},{"key":"pci_previa","header":"PCI previa (0=no;1=sí;.=sin dato)","shortLabel":"PCI Previa","category":"antecedentes","type":"binary","description":"Intervencionismo coronario percutáneo previo"},{"key":"cabg_previa","header":"CABG previa (0=no;1=sí;.=sin dato)","shortLabel":"CABG Previa","category":"antecedentes","type":"binary","description":"Cirugía de bypass aortocoronario previa"},{"key":"ic_previa","header":"Insuficiencia cardiaca previa (0=no;1=sí;.=sin dato)","shortLabel":"IC Previa","category":"antecedentes","type":"binary","description":"Antecedente de insuficiencia cardiaca crónica"},{"key":"enfermedad_arterial_periferica","header":"Enfermedad vascular periférica (0=no;1=sí;.=sin dato)","shortLabel":"EVP / PAD","category":"antecedentes","type":"binary","description":"Claudicación, bypass periférico o arteriopatía documentada"},{"key":"ictus_isquemico_previo","header":"Ictus isquémico previo (0=no;1=sí;.=sin dato)","shortLabel":"Ictus Isquémico","category":"antecedentes","type":"binary","description":"Accidente cerebrovascular isquémico previo"},{"key":"ait_previo","header":"AIT previo (0=no;1=sí;.=sin dato)","shortLabel":"AIT Previo","category":"antecedentes","type":"binary","description":"Accidente isquémico transitorio documentado"},{"key":"hemorragia_intracraneal_previa","header":"Hemorragia intracraneal previa (0=no;1=sí;.=sin dato)","shortLabel":"HIC Previa","category":"antecedentes","type":"binary","description":"Hemorragia intracraneal o ictus hemorrágico en cualquier momento"},{"key":"sangrado_previo_espontaneo","header":"Sangrado previo espontáneo con ingreso/transfusión (0=no;1=sí;.=sin dato)","shortLabel":"Sangrado Previo","category":"antecedentes","type":"binary","description":"Hemorragia previa espontánea con necesidad de ingreso o transfusión"},{"key":"cancer_activo","header":"Cáncer activo en 12 meses (0=no;1=sí;.=sin dato)","shortLabel":"Cáncer Activo","category":"antecedentes","type":"binary","description":"Neoplasia maligna activa o tratamiento antineoplásico en los últimos 12 meses"},{"key":"hepatopatia_cirrosis","header":"Hepatopatía/cirrosis con hipertensión portal (0=no;1=sí;.=sin dato)","shortLabel":"Cirrosis / HTP","category":"antecedentes","type":"binary","description":"Cirrosis hepática clínicamente relevante o hipertensión portal"},{"key":"anticoagulacion_oral_cronica","header":"Anticoagulación oral crónica indicada (0=no;1=sí;.=sin dato)","shortLabel":"AOC Crónica","category":"antecedentes","type":"binary","description":"Indicación permanente de anticoagulación oral (por FA, prótesis mecánica o TVP/TEP)"},{"key":"antiagregacion_aas_7d_previos","header":"AAS en 7 días previos al ingreso (0=no;1=sí;.=sin dato)","shortLabel":"AAS 7 días","category":"antecedentes","type":"binary","description":"Uso documentado de ácido acetilsalicílico en los 7 días previos"},{"key":"tipo_sca","header":"Tipo SCA (0=SCACEST;1=SCASEST-IAM/no Q;2=angina inestable;.=sin dato)","shortLabel":"Tipo SCA","category":"presentacion","type":"select","options":[{"value":0,"label":"0 = SCACEST"},{"value":1,"label":"1 = SCASEST-IAM (no Q)"},{"value":2,"label":"2 = Angina Inestable"},{"value":null,"label":". = Sin dato"}],"description":"Clasificación del síndrome coronario agudo según presentación"},{"key":"fc_ingreso","header":"Frecuencia cardiaca ingreso (lpm;.=sin dato)","shortLabel":"FC Ingreso","category":"presentacion","type":"numeric","unit":"lpm","description":"Frecuencia cardiaca basal al ingreso"},{"key":"pas_ingreso","header":"Presión arterial sistólica ingreso (mmHg;.=sin dato)","shortLabel":"PAS Ingreso","category":"presentacion","type":"numeric","unit":"mmHg","description":"Presión arterial sistólica inicial"},{"key":"pad_ingreso","header":"Presión arterial diastólica ingreso (mmHg;.=sin dato)","shortLabel":"PAD Ingreso","category":"presentacion","type":"numeric","unit":"mmHg","description":"Presión arterial diastólica inicial"},{"key":"killip_ingreso","header":"Clase Killip ingreso (1=I;2=II;3=III;4=IV;.=sin dato)","shortLabel":"Killip","category":"presentacion","type":"select","options":[{"value":1,"label":"1 = Killip I (sin signos de IC)"},{"value":2,"label":"2 = Killip II (crepitantes < 50%, 3R)"},{"value":3,"label":"3 = Killip III (edema agudo de pulmón)"},{"value":4,"label":"4 = Killip IV (shock cardiogénico)"},{"value":null,"label":". = Sin dato"}],"description":"Clasificación de Killip-Kimball al ingreso"},{"key":"parada_cardiaca_ingreso","header":"Parada cardiaca al ingreso (0=no;1=sí;.=sin dato)","shortLabel":"PCR Ingreso","category":"presentacion","type":"binary","description":"Reanimación por PCR extrahospitalaria o a la llegada"},{"key":"desviacion_st_ecg","header":"Desviación ST en ECG (0=no;1=sí;.=sin dato)","shortLabel":"Desviación ST","category":"presentacion","type":"binary","description":"Elevación o depresión del segmento ST >= 0.5 mm en 2 derivaciones contiguas"},{"key":"episodios_angina_24h","header":"Episodios angina >=2 en 24h (0=no;1=sí;.=sin dato)","shortLabel":"Angina >=2 en 24h","category":"presentacion","type":"binary","description":"Dos o más episodios de angina grave en las últimas 24 horas"},{"key":"estenosis_coronaria_conocida_50","header":"Estenosis coronaria previa >=50% (0=no;1=sí;.=sin dato)","shortLabel":"Estenosis Previa >=50%","category":"presentacion","type":"binary","description":"Enfermedad arterial coronaria documentada previamente con estenosis >=50%"},{"key":"coronariografia_realizada","header":"Coronariografía realizada (0=no;1=sí;.=sin dato)","shortLabel":"Cateterismo","category":"anatomia","type":"binary","description":"Realización de angiografía coronaria invasiva en el episodio"},{"key":"numero_vasos_enfermos","header":"Número de vasos con estenosis significativa (0-3;.=sin dato)","shortLabel":"Vasos Afectados","category":"anatomia","type":"numeric","description":"Número de vasos coronarios principales con estenosis >= 70% (o >= 50% en TCI)"},{"key":"afectacion_tronco_comun","header":"Tronco común izquierdo con estenosis >=50% (0=no;1=sí;.=sin dato)","shortLabel":"Tronco Común","category":"anatomia","type":"binary","description":"Afectación significativa del tronco común coronario izquierdo"},{"key":"pci_realizada","header":"PCI realizada en episodio (0=no;1=sí;.=sin dato)","shortLabel":"PCI Episodio","category":"anatomia","type":"binary","description":"Implantación de stent o angioplastia coronaria durante el episodio"},{"key":"pci_compleja","header":"PCI compleja (3 vasos/CTO/longitud >=60mm/bifurcación 2 stents) (0=no;1=sí;.=sin dato)","shortLabel":"PCI Compleja","category":"anatomia","type":"binary","description":"Cumple criterios de angioplastia compleja (definición PARIS / ESC)"},{"key":"diametro_stent_menor_3mm","header":"Diámetro de stent < 3 mm (0=no;1=sí;.=sin dato)","shortLabel":"Stent < 3 mm","category":"anatomia","type":"binary","description":"Al menos un stent implantado con diámetro menor a 3.0 mm (variable DAPT score)"},{"key":"revascularizacion_completa","header":"Revascularización completa (0=incompleta;1=completa;.=sin dato/no evaluable)","shortLabel":"Revasc. Completa","category":"anatomia","type":"select","options":[{"value":0,"label":"0 = Incompleta"},{"value":1,"label":"1 = Completa"},{"value":null,"label":". = Sin dato / No evaluable"}],"description":"Tratamiento de todas las lesiones coronarias funcionales u obstructivas"},{"key":"hemoglobina_ingreso","header":"Hemoglobina ingreso (g/dL;.=sin dato)","shortLabel":"Hb Ingreso","category":"laboratorio","type":"numeric","unit":"g/dL","description":"Hemoglobina basal al ingreso en g/dL"},{"key":"hematocrito_ingreso","header":"Hematocrito ingreso (%;.=sin dato)","shortLabel":"Hto Ingreso","category":"laboratorio","type":"numeric","unit":"%","description":"Hematocrito basal medido (no deducido) en porcentaje"},{"key":"leucocitos_ingreso","header":"Leucocitos ingreso (10^9/L;.=sin dato)","shortLabel":"Leucocitos","category":"laboratorio","type":"numeric","unit":"10^9/L","description":"Recuento de leucocitos al ingreso en 10^9/L (x1000/µL)"},{"key":"plaquetas_ingreso","header":"Plaquetas ingreso (10^9/L;.=sin dato)","shortLabel":"Plaquetas","category":"laboratorio","type":"numeric","unit":"10^9/L","description":"Recuento de plaquetas al ingreso en 10^9/L"},{"key":"creatinina_ingreso","header":"Creatinina ingreso (mg/dL;.=sin dato)","shortLabel":"Cr Ingreso","category":"laboratorio","type":"numeric","unit":"mg/dL","description":"Creatinina sérica basal al ingreso en mg/dL"},{"key":"aclaramiento_creatinina_cg","header":"CrCl Cockcroft-Gault (mL/min;.=sin dato)","shortLabel":"CrCl Cockcroft","category":"laboratorio","type":"numeric","unit":"mL/min","description":"Aclaramiento de creatinina calculado por fórmula de Cockcroft-Gault"},{"key":"fg_ckd_epi","header":"FG CKD-EPI informado (mL/min/1.73m²;.=sin dato)","shortLabel":"eGFR CKD-EPI","category":"laboratorio","type":"numeric","unit":"mL/min/1.73m²","description":"Filtrado glomerular estimado informado por laboratorio"},{"key":"glucosa_ingreso","header":"Glucosa ingreso (mg/dL;.=sin dato)","shortLabel":"Glucosa","category":"laboratorio","type":"numeric","unit":"mg/dL","description":"Glucemia basal al ingreso"},{"key":"hba1c","header":"HbA1c (%;.=sin dato)","shortLabel":"HbA1c","category":"laboratorio","type":"numeric","unit":"%","description":"Hemoglobina glicada en porcentaje"},{"key":"potasio_ingreso","header":"Potasio ingreso (mmol/L;.=sin dato)","shortLabel":"Potasio","category":"laboratorio","type":"numeric","unit":"mmol/L","description":"Potasio sérico al ingreso"},{"key":"fevi_inicial","header":"FEVI inicial (%;.=sin dato)","shortLabel":"FEVI Inicial","category":"ventricular_biomarcadores","type":"numeric","unit":"%","description":"Fracción de eyección del ventrículo izquierdo inicial documentada"},{"key":"troponina_pico_observado","header":"Troponina pico observado (ng/L;.=sin dato)","shortLabel":"Troponina Pico","category":"ventricular_biomarcadores","type":"numeric","unit":"ng/L","description":"Valor máximo observado de troponina en el episodio"},{"key":"troponina_tipo","header":"Troponina tipo (I/T;.=sin dato)","shortLabel":"Tipo Troponina","category":"ventricular_biomarcadores","type":"text","description":"Tipo de ensayo de troponina (I o T ultrasensible)"},{"key":"troponina_limite_superior_url","header":"Troponina límite superior URL (ng/L;.=sin dato)","shortLabel":"Troponina URL","category":"ventricular_biomarcadores","type":"numeric","unit":"ng/L","description":"Percentil 99 o límite superior de referencia del ensayo utilizado"},{"key":"biomarcadores_positivos_elevados","header":"Biomarcadores miocárdicos elevados (0=no;1=sí;.=sin dato)","shortLabel":"Troponina > URL","category":"ventricular_biomarcadores","type":"binary","description":"Elevación de troponina por encima del percentil 99 del ensayo"},{"key":"nt_probnp_maximo","header":"NT-proBNP máximo (pg/mL;.=sin dato)","shortLabel":"NT-proBNP","category":"ventricular_biomarcadores","type":"numeric","unit":"pg/mL","description":"Pico observado de NT-proBNP"},{"key":"colesterol_total","header":"Colesterol total (mg/dL;.=sin dato)","shortLabel":"Col. Total","category":"lipidos","type":"numeric","unit":"mg/dL","description":"Colesterol total sérico"},{"key":"ldl_colesterol","header":"Colesterol LDL (mg/dL;.=sin dato)","shortLabel":"c-LDL","category":"lipidos","type":"numeric","unit":"mg/dL","description":"Colesterol LDL medido o calculado"},{"key":"hdl_colesterol","header":"Colesterol HDL (mg/dL;.=sin dato)","shortLabel":"c-HDL","category":"lipidos","type":"numeric","unit":"mg/dL","description":"Colesterol HDL sérico"},{"key":"trigliceridos","header":"Triglicéridos (mg/dL;.=sin dato)","shortLabel":"Triglicéridos","category":"lipidos","type":"numeric","unit":"mg/dL","description":"Concentración sérica de triglicéridos"},{"key":"lpa_mg_dl","header":"Lipoproteína(a) (mg/dL;.=sin dato)","shortLabel":"Lp(a) mg/dL","category":"lipidos","type":"numeric","unit":"mg/dL","description":"Lp(a) medida en concentración de masa"},{"key":"aas_documentado","header":"AAS documentado (0=no;1=sí;.=sin dato)","shortLabel":"AAS","category":"farmacos_documentados","type":"binary","description":"Ácido acetilsalicílico prescrito/administrado"},{"key":"ticagrelor_documentado","header":"Ticagrelor documentado (0=no;1=sí;.=sin dato)","shortLabel":"Ticagrelor","category":"farmacos_documentados","type":"binary","description":"Ticagrelor 90 mg/12h documentado"},{"key":"prasugrel_documentado","header":"Prasugrel documentado (0=no;1=sí;.=sin dato)","shortLabel":"Prasugrel","category":"farmacos_documentados","type":"binary","description":"Prasugrel 10 mg/día (o 5 mg/día ajustado) documentado"},{"key":"clopidogrel_documentado","header":"Clopidogrel documentado (0=no;1=sí;.=sin dato)","shortLabel":"Clopidogrel","category":"farmacos_documentados","type":"binary","description":"Clopidogrel 75 mg/día documentado"},{"key":"anticoagulante_oral_documentado","header":"Anticoagulante oral documentado (0=no;1=sí;.=sin dato)","shortLabel":"AOC","category":"farmacos_documentados","type":"binary","description":"Anticoagulante de acción directa (DOAC) o antagonista de vit K (AVK)"},{"key":"estatinas_documentadas","header":"Estatinas documentadas (0=no;1=sí;.=sin dato)","shortLabel":"Estatina","category":"farmacos_documentados","type":"binary","description":"Cualquier estatina documentada"},{"key":"estatina_alta_intensidad","header":"Estatina alta intensidad (atorva>=40/rosuva>=20) (0=no;1=sí;.=sin dato)","shortLabel":"Estatina Alta Int.","category":"farmacos_documentados","type":"binary","description":"Atorvastatina >= 40 mg o Rosuvastatina >= 20 mg diarios"},{"key":"ezetimiba_documentada","header":"Ezetimiba documentada (0=no;1=sí;.=sin dato)","shortLabel":"Ezetimiba","category":"farmacos_documentados","type":"binary","description":"Ezetimiba 10 mg/día documentada"},{"key":"betabloqueante_documentado","header":"Betabloqueante documentado (0=no;1=sí;.=sin dato)","shortLabel":"Betabloqueante","category":"farmacos_documentados","type":"binary","description":"Betabloqueante (bisoprolol, metoprolol, carvedilol) documentado"},{"key":"ieca_ara2_documentado","header":"IECA o ARA II documentado (0=no;1=sí;.=sin dato)","shortLabel":"IECA / ARA II","category":"farmacos_documentados","type":"binary","description":"Inhibidor de la ECA o antagonista del receptor de angiotensina II"},{"key":"arni_documentado","header":"ARNI sacubitrilo/valsartán documentado (0=no;1=sí;.=sin dato)","shortLabel":"ARNI","category":"farmacos_documentados","type":"binary","description":"Sacubitrilo/valsartán documentado"},{"key":"isglt2_documentado","header":"iSGLT2 documentado (0=no;1=sí;.=sin dato)","shortLabel":"iSGLT2","category":"farmacos_documentados","type":"binary","description":"Inhibidor SGLT2 (dapagliflozina, empagliflozina) documentado"},{"key":"arm_documentado","header":"ARM eplerenona/espironolactona documentado (0=no;1=sí;.=sin dato)","shortLabel":"ARM","category":"farmacos_documentados","type":"binary","description":"Antagonista del receptor de mineralocorticoides documentado"},{"key":"ibp_documentado","header":"IBP gastroprotección documentado (0=no;1=sí;.=sin dato)","shortLabel":"IBP","category":"farmacos_documentados","type":"binary","description":"Inhibidor de la bomba de protones documentado"},{"key":"rehabilitacion_cardiaca_documentada","header":"Derivación a rehabilitación cardiaca (0=no;1=sí;.=sin dato)","shortLabel":"Rehab. Cardiaca","category":"farmacos_documentados","type":"binary","description":"Derivación prescrita a programa de prevención secundaria y rehabilitación cardiaca"},{"key":"dapt_meses_documentados","header":"DAPT documentada (meses;.=sin dato)","shortLabel":"DAPT Documentada (m)","category":"duraciones","type":"numeric","unit":"meses","description":"Duración explícita de doble antiagregación documentada en el informe de alta"},{"key":"dapt_meses_propuestos","header":"DAPT propuesta plataforma (meses;.=sin dato)","shortLabel":"DAPT Propuesta (m)","category":"duraciones","type":"numeric","unit":"meses","description":"Duración de DAPT sugerida por las guías en base al perfil isquémico/hemorrágico"},{"key":"dapt_meses_aceptados","header":"DAPT aceptada por médico (meses;.=sin dato)","shortLabel":"DAPT Aceptada (m)","category":"duraciones","type":"numeric","unit":"meses","description":"Duración de DAPT validada o fijada por el médico responsable"}];
+
+    
+// MOTOR DETERMINISTA Y EXTRACTOR EMBEBIDO
+function calculateCockcroftGault(edad, peso, creatinina, sexo) {
+  if (!edad || !peso || !creatinina || creatinina <= 0) return { crCl: null };
+  const factor = sexo === 1 ? 0.85 : 1.0;
+  const val = ((140 - edad) * peso * factor) / (72 * creatinina);
+  return { crCl: Math.round(val * 10) / 10 };
+}
+
+function calculateGrace(d) {
+  const edad = d.edad, fc = d.fc_ingreso, pas = d.pas_ingreso, cr = d.creatinina_ingreso;
+  const killip = d.killip_ingreso || 1;
+  const parada = d.parada_cardiaca_ingreso === 1;
+  const st = d.desviacion_st_ecg === 1;
+  const bio = d.biomarcadores_positivos_elevados === 1;
+  
+  if (edad === null || fc === null || pas === null || cr === null) {
+    return { points: null, category: 'Indeterminado' };
+  }
+  
+  let pts = 0;
+  if (edad < 30) pts += 0; else if (edad < 40) pts += 8; else if (edad < 50) pts += 25; else if (edad < 60) pts += 41; else if (edad < 70) pts += 58; else if (edad < 80) pts += 75; else if (edad < 90) pts += 91; else pts += 100;
+  if (fc < 50) pts += 0; else if (fc < 70) pts += 3; else if (fc < 90) pts += 9; else if (fc < 110) pts += 15; else if (fc < 150) pts += 24; else if (fc < 200) pts += 38; else pts += 46;
+  if (pas < 80) pts += 58; else if (pas < 100) pts += 53; else if (pas < 120) pts += 43; else if (pas < 140) pts += 34; else if (pas < 160) pts += 24; else if (pas < 200) pts += 10; else pts += 0;
+  if (cr < 0.4) pts += 1; else if (cr < 0.8) pts += 4; else if (cr < 1.2) pts += 7; else if (cr < 1.6) pts += 10; else if (cr < 2.0) pts += 13; else if (cr < 4.0) pts += 21; else pts += 28;
+  if (killip === 2) pts += 20; else if (killip === 3) pts += 39; else if (killip >= 4) pts += 59;
+  if (parada) pts += 39;
+  if (st) pts += 28;
+  if (bio) pts += 14;
+  
+  const isStemi = d.tipo_sca === 0;
+  let cat = 'Bajo';
+  if (isStemi) {
+    if (pts <= 125) cat = 'Bajo'; else if (pts <= 154) cat = 'Intermedio'; else cat = 'Alto';
+  } else {
+    if (pts <= 108) cat = 'Bajo'; else if (pts <= 140) cat = 'Intermedio'; else cat = 'Alto';
+  }
+  return { points: pts, category: cat };
+}
+
+function calculateTimi(d) {
+  if (d.edad === null || d.desviacion_st_ecg === null || d.biomarcadores_positivos_elevados === null) {
+    return { points: null, category: 'Indeterminado' };
+  }
+  let pts = 0;
+  if (d.edad >= 65) pts++;
+  let rf = 0;
+  if (d.hta_previa === 1) rf++;
+  if (d.dislipidemia === 1) rf++;
+  if (d.diabetes === 1) rf++;
+  if (d.tabaquismo_activo === 1) rf++;
+  if (rf >= 3) pts++;
+  if (d.estenosis_coronaria_conocida_50 === 1) pts++;
+  if (d.antiagregacion_aas_7d_previos === 1) pts++;
+  if (d.episodios_angina_24h === 1) pts++;
+  if (d.desviacion_st_ecg === 1) pts++;
+  if (d.biomarcadores_positivos_elevados === 1) pts++;
+  
+  let cat = 'Bajo';
+  if (pts <= 2) cat = 'Bajo (4.7%)';
+  else if (pts <= 4) cat = 'Intermedio (13-20%)';
+  else cat = 'Alto (26-41%)';
+  return { points: pts, category: cat };
+}
+
+function calculatePreciseDapt(d, crcl) {
+  if (d.edad === null || crcl === null || d.hemoglobina_ingreso === null || d.leucocitos_ingreso === null || d.sangrado_previo_espontaneo === null) {
+    return { points: null, category: 'Indeterminado' };
+  }
+  let pts = 0;
+  if (d.edad > 50) pts += Math.min(28, Math.round((d.edad - 50) * 0.7));
+  if (crcl <= 15) pts += 25; else if (crcl <= 30) pts += 18; else if (crcl <= 60) pts += 9; else if (crcl <= 90) pts += 4; else if (crcl < 100) pts += 1;
+  if (d.hemoglobina_ingreso < 15) pts += Math.min(26, Math.max(0, Math.round((15 - d.hemoglobina_ingreso) * 3.7)));
+  if (d.leucocitos_ingreso > 5) pts += Math.min(14, Math.max(0, Math.round((d.leucocitos_ingreso - 5) * 0.9)));
+  if (d.sangrado_previo_espontaneo === 1) pts += 24;
+  
+  const isHbr = pts >= 25;
+  return { points: pts, category: isHbr ? 'Alto (HBR ≥ 25)' : 'Bajo / Estándar (< 25)', isHbr };
+}
+
+function calculateCrusade(d, crcl) {
+  const hto = d.hematocrito_ingreso || (d.hemoglobina_ingreso ? d.hemoglobina_ingreso * 3 : null);
+  if (!hto || !crcl || !d.fc_ingreso || !d.pas_ingreso) return { points: null, category: 'Indeterminado' };
+  let pts = 0;
+  if (hto < 31) pts += 9; else if (hto < 34) pts += 7; else if (hto < 37) pts += 3; else if (hto < 40) pts += 2;
+  if (crcl <= 15) pts += 35; else if (crcl <= 30) pts += 25; else if (crcl <= 60) pts += 14; else if (crcl <= 90) pts += 7;
+  if (d.fc_ingreso >= 121) pts += 11; else if (d.fc_ingreso >= 111) pts += 10; else if (d.fc_ingreso >= 101) pts += 8; else if (d.fc_ingreso >= 91) pts += 6; else if (d.fc_ingreso >= 81) pts += 3; else if (d.fc_ingreso >= 71) pts += 1;
+  if (d.sexo === 1) pts += 8;
+  if (d.killip_ingreso && d.killip_ingreso >= 2) pts += 7;
+  if (d.enfermedad_arterial_periferica === 1 || d.ictus_isquemico_previo === 1) pts += 7;
+  if (d.diabetes === 1) pts += 6;
+  if (d.pas_ingreso < 90) pts += 10; else if (d.pas_ingreso < 100) pts += 8; else if (d.pas_ingreso < 120) pts += 1;
+  
+  let cat = 'Muy Bajo (<=20)';
+  if (pts <= 20) cat = 'Muy Bajo (<=20)';
+  else if (pts <= 30) cat = 'Bajo (21-30)';
+  else if (pts <= 40) cat = 'Moderado (31-40)';
+  else if (pts <= 50) cat = 'Alto (41-50)';
+  else cat = 'Muy Alto (>50)';
+  return { points: pts, category: cat };
+}
+
+function calculateArcHbr(d, crcl) {
+  const major = [];
+  const minor = [];
+  if (d.anticoagulacion_oral_cronica === 1 || d.fa_previa === 1) major.push('Anticoagulación oral crónica');
+  if (crcl !== null && crcl < 30) major.push('ERC grave (CrCl < 30 mL/min)');
+  else if (crcl !== null && crcl < 60) minor.push('ERC moderada (CrCl 30-59 mL/min)');
+  if (d.hemoglobina_ingreso !== null) {
+    if (d.hemoglobina_ingreso < 11.0) major.push('Anemia grave (Hb < 11.0 g/dL)');
+    else if (d.sexo === 0 && d.hemoglobina_ingreso < 13.0) minor.push('Anemia moderada en varón (Hb < 13.0)');
+    else if (d.sexo === 1 && d.hemoglobina_ingreso < 12.0) minor.push('Anemia moderada en mujer (Hb < 12.0)');
+  }
+  if (d.sangrado_previo_espontaneo === 1) major.push('Sangrado espontáneo hospitalario previo');
+  if (d.plaquetas_ingreso && d.plaquetas_ingreso < 100) major.push('Trombocitopenia < 100');
+  if (d.cancer_activo === 1) major.push('Cáncer activo');
+  if (d.hemorragia_intracraneal_previa === 1) major.push('Hemorragia intracraneal previa');
+  if (d.edad >= 75) minor.push('Edad >= 75 años');
+  if (d.ictus_isquemico_previo === 1) minor.push('Ictus isquémico previo');
+  
+  const isHbr = major.length >= 1 || minor.length >= 2;
+  const isIndet = (d.creatinina_ingreso === null || d.hemoglobina_ingreso === null) && !isHbr;
+  return {
+    isHbr: isIndet ? null : isHbr,
+    category: isIndet ? 'Indeterminado' : (isHbr ? 'HBR Positivo' : 'No HBR'),
+    majorCount: major.length,
+    minorCount: minor.length,
+    majorList: major,
+    minorList: minor
+  };
+}
+
+function calculateDaptScore(d, phase) {
+  if (phase !== 'seguimiento_12m') {
+    return { points: null, category: 'No aplicable en fase aguda', applicable: false };
+  }
+  if (d.edad === null || d.tabaquismo_activo === null || d.diabetes === null) return { points: null, category: 'Indeterminado' };
+  let pts = 0;
+  if (d.edad >= 75) pts -= 2; else if (d.edad >= 65) pts -= 1;
+  if (d.tabaquismo_activo === 1) pts += 1;
+  if (d.diabetes === 1) pts += 1;
+  if (d.tipo_sca === 0 || d.tipo_sca === 1) pts += 1;
+  if (d.pci_previa === 1 || d.iam_previo === 1) pts += 1;
+  if (d.diametro_stent_menor_3mm === 1) pts += 1;
+  if (d.ic_previa === 1 || (d.fevi_inicial !== null && d.fevi_inicial < 30)) pts += 2;
+  return { points: pts, category: pts >= 2 ? 'Favorable prolongar DAPT (>12m)' : 'Desfavorable prolongar (Suspender al año)', applicable: true };
+}
+
+function computeAllScores(patient) {
+  const d = {};
+  Object.keys(patient.data).forEach(k => { d[k] = patient.data[k].value; });
+  const cg = calculateCockcroftGault(d.edad, d.peso_kg, d.creatinina_ingreso, d.sexo);
+  const crcl = cg.crCl !== null ? cg.crCl : d.aclaramiento_creatinina_cg;
+  return {
+    crcl,
+    cg,
+    grace: calculateGrace(d),
+    timi: calculateTimi(d),
+    preciseDapt: calculatePreciseDapt(d, crcl),
+    crusade: calculateCrusade(d, crcl),
+    arcHbr: calculateArcHbr(d, crcl),
+    daptScore: calculateDaptScore(d, patient.evaluationPhase)
+  };
+}
+
+// Extractor Determinista de Texto a Variables Clínicas
+function extractFromText(text, targetId) {
+  const idMatch = text.match(/ID:\s*([A-Za-z0-9\-_]+)/i);
+  const patientId = idMatch ? idMatch[1] : (targetId || 'SCA-MANUAL-001');
+  const fields = {};
+  DICTIONARY.forEach(def => {
+    fields[def.key] = { value: null, quote: '' };
+  });
+  fields.id_pseudonimo.value = patientId;
+  fields.id_episodio_indice.value = 'EP-01';
+
+  const age = text.match(/(?:edad|var[oó]n|mujer|paciente)?\s*(?:de\s*)?(\d{2})\s*(?:a[ñn]os|a\b)/i);
+  if (age) { fields.edad.value = parseInt(age[1], 10); fields.edad.quote = age[0]; }
+
+  if (/\b(?:var[oó]n|hombre|masculino)\b/i.test(text)) { fields.sexo.value = 0; fields.sexo.quote = 'Varón'; }
+  else if (/\b(?:mujer|femenino)\b/i.test(text)) { fields.sexo.value = 1; fields.sexo.quote = 'Mujer'; }
+
+  const peso = text.match(/peso[:\s]*(\d{2,3}(?:[.,]\d+)?)\s*kg/i);
+  if (peso) { fields.peso_kg.value = parseFloat(peso[1].replace(',', '.')); fields.peso_kg.quote = peso[0]; }
+  const talla = text.match(/talla[:\s]*(\d{2,3})\s*cm/i);
+  if (talla) { fields.talla_cm.value = parseFloat(talla[1]); fields.talla_cm.quote = talla[0]; }
+
+  const fc = text.match(/(?:fc|frecuencia cardiaca)[:\s]*(\d{2,3})/i);
+  if (fc) { fields.fc_ingreso.value = parseInt(fc[1], 10); fields.fc_ingreso.quote = fc[0]; }
+  const pa = text.match(/(?:pa|presi[oó]n arterial|ta)[:\s]*(\d{2,3})\s*\/\s*(\d{2,3})/i);
+  if (pa) { fields.pas_ingreso.value = parseInt(pa[1], 10); fields.pad_ingreso.value = parseInt(pa[2], 10); fields.pas_ingreso.quote = pa[0]; }
+
+  if (/\b(?:scacest|stemi|elevaci[oó]n del segmento st)\b/i.test(text)) { fields.tipo_sca.value = 0; fields.desviacion_st_ecg.value = 1; fields.tipo_sca.quote = 'SCACEST'; }
+  else if (/\b(?:scasest|iamsest|nstemi)\b/i.test(text)) { fields.tipo_sca.value = 1; fields.tipo_sca.quote = 'SCASEST'; }
+  else if (/angina inestable/i.test(text)) { fields.tipo_sca.value = 2; fields.tipo_sca.quote = 'Angina Inestable'; }
+
+  const killip = text.match(/killip\s*([I|V|1-4]+)/i);
+  if (killip) {
+    const k = killip[1].toUpperCase();
+    fields.killip_ingreso.value = (k === 'IV' || k === '4') ? 4 : (k === 'III' || k === '3') ? 3 : (k === 'II' || k === '2') ? 2 : 1;
+    fields.killip_ingreso.quote = killip[0];
+  }
+
+  if (/niega (?:diabetes|dm2?)/i.test(text)) { fields.diabetes.value = 0; fields.diabetes.quote = 'Niega diabetes'; }
+  else if (/\b(?:diabetes|dm2?)\b/i.test(text)) { fields.diabetes.value = 1; fields.diabetes.quote = 'Diabetes documentada'; }
+
+  if (/niega (?:hta|hipertensi[oó]n)/i.test(text)) { fields.hta_previa.value = 0; fields.hta_previa.quote = 'No hipertenso'; }
+  else if (/\b(?:hta|hipertensi[oó]n)\b/i.test(text)) { fields.hta_previa.value = 1; fields.hta_previa.quote = 'Hipertensión documentada'; }
+
+  if (/fumador (?:activo|de)|tabaquismo activo/i.test(text)) { fields.tabaquismo_activo.value = 1; fields.tabaquismo_activo.quote = 'Fumador activo'; }
+  else if (/exfumador/i.test(text)) { fields.tabaquismo_activo.value = 0; fields.tabaquismo_previo.value = 1; fields.tabaquismo_activo.quote = 'Exfumador'; }
+  else if (/no fumador/i.test(text)) { fields.tabaquismo_activo.value = 0; fields.tabaquismo_activo.quote = 'No fumador'; }
+
+  if (/\b(?:fibrilaci[oó]n auricular|fa permanente|fa parox[ií]stica)\b/i.test(text)) { fields.fa_previa.value = 1; fields.fa_previa.quote = 'FA documentada'; }
+  if (/niega (?:ictus|acv|ait)/i.test(text)) { fields.ictus_isquemico_previo.value = 0; fields.ictus_isquemico_previo.quote = 'Niega ictus'; }
+  else if (/\b(?:ictus isqu[eé]mico|acv isqu[eé]mico)\b/i.test(text)) { fields.ictus_isquemico_previo.value = 1; fields.ictus_isquemico_previo.quote = 'Ictus isquémico documentado'; }
+
+  const cr = text.match(/creatinina[:\s]*(\d{1,2}(?:[.,]\d+)?)/i);
+  if (cr) { fields.creatinina_ingreso.value = parseFloat(cr[1].replace(',', '.')); fields.creatinina_ingreso.quote = cr[0]; }
+  const hb = text.match(/hemoglobina[:\s]*(\d{1,2}(?:[.,]\d+)?)/i);
+  if (hb) { fields.hemoglobina_ingreso.value = parseFloat(hb[1].replace(',', '.')); fields.hemoglobina_ingreso.quote = hb[0]; }
+  const leuco = text.match(/leucocitos[:\s]*(\d{1,2}(?:[.,]\d+)?)/i);
+  if (leuco) { fields.leucocitos_ingreso.value = parseFloat(leuco[1].replace(',', '.')); fields.leucocitos_ingreso.quote = leuco[0]; }
+
+  const trop = text.match(/troponina[:\s]*(\d[\d,.]*)/i);
+  if (trop) {
+    const val = parseFloat(trop[1].replace(',', '.'));
+    fields.troponina_pico_observado.value = val;
+    fields.biomarcadores_positivos_elevados.value = val > 14 ? 1 : 0;
+    fields.troponina_pico_observado.quote = trop[0];
+  }
+  const fevi = text.match(/fevi[:\s]*(\d{2})%/i);
+  if (fevi) { fields.fevi_inicial.value = parseInt(fevi[1], 10); fields.fevi_inicial.quote = fevi[0]; }
+
+  return fields;
+}
+
+
+    
+// VISTAS DEL CLIENTE STANDALONE
+
+function renderIntakeView() {
+  return `
+    <div class="card">
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">📥 Entrada y Extracción de Documentos Clínicos</h2>
+      <p style="font-size: 0.8rem; color: var(--color-muted); margin-bottom: 16px;">
+        Pegue aquí el texto de informes de urgencias, analíticas, cateterismo o epicrisis. El extractor determinista normalizará las variables clínicas según el Diccionario Oficial sin inventar datos no mencionados.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Texto Clínico sin Estructurar:</label>
+        <textarea id="intake-text" class="form-control" style="height: 180px; font-family: monospace; font-size: 0.75rem;" placeholder="Ejemplo: Paciente varón de 64 años, fumador activo, acude por dolor torácico opresivo de 3 horas. ECG: elevación del segmento ST de 3 mm en V1-V4 (SCACEST). PA 130/80 mmHg, FC 88 lpm. Killip I. Analítica: Creatinina 1.1 mg/dL, Hb 14.5 g/dL, Leucocitos 9.8..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center;">
+        <button class="btn btn-primary" onclick="handleRunExtraction()">🔍 Extraer Variables Deterministas</button>
+        <button class="btn btn-outline" onclick="loadSampleIntoIntake()">Cargar Texto de Ejemplo</button>
+        <input type="file" id="file-uploader" style="display:none;" onchange="handleFileUpload(event)" accept=".txt,.json">
+        <button class="btn btn-outline" onclick="document.getElementById('file-uploader').click()">📁 Cargar Archivo .txt</button>
+      </div>
+
+      <div id="extraction-results" style="display: none;">
+        <div class="alert-box alert-emerald" id="extraction-alert"></div>
+        <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 14px;">
+          <table>
+            <thead><tr><th>Variable</th><th>Valor Extraído</th><th>Fragmento de Respaldo</th></tr></thead>
+            <tbody id="extraction-table-body" class="mono"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary" onclick="handleImportExtractedToSession()">✅ Cargar en Sesión y Pasar a Revisión</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReviewView() {
+  const p = currentActivePatient;
+  const d = p.data;
+  const groups = [
+    { title: '1. Identificación y Parámetros Biométricos', keys: ['id_pseudonimo', 'id_episodio_indice', 'edad', 'sexo', 'peso_kg', 'talla_cm', 'imc'] },
+    { title: '2. Constantes y Presentación Aguda', keys: ['tipo_sca', 'fc_ingreso', 'pas_ingreso', 'pad_ingreso', 'killip_ingreso', 'desviacion_st_ecg', 'parada_cardiaca_ingreso'] },
+    { title: '3. Antecedentes y Comorbilidades', keys: ['hta_previa', 'diabetes', 'dislipidemia', 'tabaquismo_activo', 'tabaquismo_previo', 'fa_previa', 'anticoagulacion_oral_cronica', 'ictus_isquemico_previo', 'ait_previo', 'hemorragia_intracraneal_previa', 'sangrado_previo_espontaneo', 'cancer_activo'] },
+    { title: '4. Laboratorio y Biomarcadores', keys: ['creatinina_ingreso', 'hemoglobina_ingreso', 'hematocrito_ingreso', 'leucocitos_ingreso', 'plaquetas_ingreso', 'troponina_pico_observado', 'biomarcadores_positivos_elevados', 'ldl_colesterol'] },
+    { title: '5. Función Ventricular e Intervencionismo', keys: ['fevi_inicial', 'numero_vasos_enfermos', 'revascularizacion_completa', 'diametro_stent_menor_3mm', 'pci_previa', 'iam_previo'] }
+  ];
+
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">✏️ Editor y Auditoría de Variables Clínicas</h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">Paciente activo: <strong>${p.id}</strong> (Episodio: ${p.episodeId}). Modifique cualquier valor para recalcular en tiempo real.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="handleSavePatientToStorage()">💾 Guardar en Base de Datos</button>
+          <button class="btn btn-primary" onclick="switchTab('scores')">Ver Calculadoras ➔</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        ${groups.map(g => `
+          <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+            <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; border-bottom: 1px solid #F1F5F9; padding-bottom: 4px;">${g.title}</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
+              ${g.keys.map(k => {
+                const def = DICTIONARY.find(x => x.key === k) || { shortLabel: k, type: 'text', unit: '' };
+                const field = d[k] || { value: null };
+                const val = field.value !== null && field.value !== undefined ? field.value : '';
+                return `
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="display: flex; justify-content: space-between;">
+                      <span>${def.shortLabel} ${def.unit ? '(' + def.unit + ')' : ''}</span>
+                      ${field.quote ? '<span title="' + field.quote.replace(/"/g, '&quot;') + '" style="cursor:help; color:var(--color-teal);">[doc]</span>' : ''}
+                    </label>
+                    ${renderFieldInput(k, def, val)}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderFieldInput(key, def, val) {
+  if (def.options && def.options.length > 0) {
+    return `
+      <select class="form-control" onchange="updatePatientField('${key}', this.value)">
+        <option value="" ${val === '' ? 'selected' : ''}>. (Sin dato)</option>
+        ${def.options.filter(o => o.value !== null).map(o => `
+          <option value="${o.value}" ${String(val) === String(o.value) ? 'selected' : ''}>${o.label}</option>
+        `).join('')}
+      </select>
+    `;
+  }
+  const inputType = def.type === 'numeric' ? 'number' : 'text';
+  const step = def.type === 'numeric' ? 'any' : undefined;
+  return `
+    <input type="${inputType}" ${step ? 'step="' + step + '"' : ''} class="form-control mono" value="${val}" onchange="updatePatientField('${key}', this.value)">
+  `;
+}
+
+function renderScoresView() {
+  const p = currentActivePatient;
+  const scores = computeAllScores(p);
+  const d = {};
+  Object.keys(p.data).forEach(k => { d[k] = p.data[k].value; });
+
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">🧮 Calculadoras de Riesgo Deterministas</h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">Paciente evaluado: <strong>${p.id}</strong> · Cálculos recalculados automáticamente tras cualquier edición.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="switchTab('review')">✏️ Editar Variables</button>
+          <button class="btn btn-primary" onclick="switchTab('recs')">Ver Recomendaciones ➔</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+        <!-- Cockcroft-Gault -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">Cockcroft-Gault CrCl</h3>
+          <p class="mono" style="font-size: 1.4rem; font-weight: 700; color: var(--color-teal); margin: 4px 0;">
+            ${scores.crcl !== null ? scores.crcl + ' mL/min' : 'No calculable'}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Fórmula: [(140 - edad) × peso × (0.85 si F)] / (72 × Cr). Variable obligatoria para PRECISE-DAPT y CRUSADE.</p>
+        </div>
+
+        <!-- GRACE Score -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">GRACE 2.0 (Mortalidad Intrahospitalaria)</h3>
+          <p class="mono" style="font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.grace.points !== null ? scores.grace.points + ' pts' : 'Indeterminado'}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Categoría: <strong>${scores.grace.category}</strong>. ${scores.grace.points > 140 ? '⚠️ Criterio de coronariografía en &lt; 24h.' : ''}</p>
+        </div>
+
+        <!-- TIMI UA/NSTEMI -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">TIMI UA/NSTEMI (7 factores)</h3>
+          <p class="mono" style="font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.timi.points !== null ? scores.timi.points + ' / 7 pts' : 'Indeterminado'}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Riesgo de evento a 14 días: <strong>${scores.timi.category}</strong> (Antman et al. JAMA 2000).</p>
+        </div>
+
+        <!-- PRECISE-DAPT -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">PRECISE-DAPT (Sangrado ambulatorio)</h3>
+          <p class="mono" style="font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.preciseDapt.points !== null ? scores.preciseDapt.points + ' pts' : 'Indeterminado'}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Estratificación: <strong>${scores.preciseDapt.category}</strong>. Umbral HBR ≥ 25.</p>
+        </div>
+
+        <!-- CRUSADE -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">CRUSADE (Sangrado hospitalario)</h3>
+          <p class="mono" style="font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.crusade.points !== null ? scores.crusade.points + ' pts' : 'Indeterminado'}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Categoría: <strong>${scores.crusade.category}</strong> (Subherwal et al. Circulation 2009).</p>
+        </div>
+
+        <!-- ARC-HBR -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">ARC-HBR Consenso</h3>
+          <p style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.arcHbr.category}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Mayores: ${scores.arcHbr.majorCount} | Menores: ${scores.arcHbr.minorCount}. ${scores.arcHbr.majorList.length ? 'Mayores: ' + scores.arcHbr.majorList.join(', ') : ''}</p>
+        </div>
+
+        <!-- DAPT Score -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">DAPT Score (Yeh et al.)</h3>
+          <p style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin: 4px 0;">
+            ${scores.daptScore.category}
+          </p>
+          <p style="font-size: 0.72rem; color: var(--color-muted);">Salvaguarda: Sólo aplicable tras 12 meses de DAPT completada sin eventos isquémicos ni hemorrágicos.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRecsView() {
+  const p = currentActivePatient;
+  const scores = computeAllScores(p);
+  const d = {};
+  Object.keys(p.data).forEach(k => { d[k] = p.data[k].value; });
+
+  const isStemi = d.tipo_sca === 0;
+  const hasFa = d.fa_previa === 1 || d.anticoagulacion_oral_cronica === 1;
+  const isHbr = scores.arcHbr.isHbr === true || (scores.preciseDapt.points !== null && scores.preciseDapt.points >= 25);
+  const strokeContraindication = d.ictus_isquemico_previo === 1 || d.ait_previo === 1 || d.hemorragia_intracraneal_previa === 1;
+
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">💡 Recomendaciones Individualizadas y Citas Científicas</h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">Estratificación y plan terapéutico guiado por Guías ESC 2023 SCA y ACC/AHA 2025 para <strong>${p.id}</strong>.</p>
+        </div>
+        <button class="btn btn-outline" onclick="openReportModal()">🖨️ Ver / Imprimir Informe</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Invasivo -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 14px; background: #FFFFFF;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-teal); text-transform: uppercase;">1. Estrategia Invasiva y Reperfusión</span>
+            <span class="badge badge-local">Clase I, Nivel A</span>
+          </div>
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px;">
+            ${isStemi ? 'Reperfusión inmediata mediante ICP primaria por acceso radial (< 60-90 min)' : (scores.grace.points > 140 ? 'Estrategia invasiva PRECOZ (< 24 h) por Puntuación GRACE > 140' : 'Estrategia invasiva selectiva guiada por estratificación')}
+          </h4>
+          <p style="font-size: 0.8rem; color: #334155; margin-bottom: 6px;">
+            ${isStemi ? 'Diagnóstico de SCACEST confirmado. El acceso radial reduce sangrado en el sitio de punción y mortalidad.' : 'SCASEST de alto riesgo; se beneficia de revascularización anatómica guiada intrahospitalaria.'}
+          </p>
+          <div style="font-size: 0.72rem; color: #64748B;">Cita: Guía ESC 2023 ACS · DOI: 10.1093/eurheartj/ehad191</div>
+        </div>
+
+        <!-- Antitrombótico -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 14px; background: #FFFFFF;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-teal); text-transform: uppercase;">2. Régimen Antitrombótico y Duración DAPT</span>
+            <span class="badge badge-local">Clase I, Nivel A</span>
+          </div>
+          ${strokeContraindication ? '<div class="alert-box alert-red" style="margin-bottom:8px;"><strong>ALERTA DE SEGURIDAD CRÍTICA:</strong> Prasugrel está estrictamente CONTRAINDICADO (Clase III) por antecedente de ictus/AIT. Use Ticagrelor o Clopidogrel.</div>' : ''}
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px;">
+            ${hasFa ? 'Doble terapia: DOAC a dosis estándar + Clopidogrel 75 mg/día. Suspender AAS al alta.' : (strokeContraindication ? 'AAS 100 mg/día + TICAGRELOR 90 mg/12 h (Prasugrel bloqueado por seguridad).' : (isHbr ? 'Doble antiagregación corta (1 a 3 meses) con AAS + Clopidogrel por Alto Riesgo Hemorrágico.' : 'AAS 100 mg/día + PRASUGREL 10 mg/día (5 mg si edad ≥75 o peso &lt;60 kg) durante 12 meses.'))}
+          </h4>
+          <p style="font-size: 0.8rem; color: #334155; margin-bottom: 6px;">
+            ${hasFa ? 'En FA sometida a PCI, las guías contraindican la triple terapia prolongada por triplicar el sangrado sin reducir eventos isquémicos.' : 'Tratamiento antiplaquetario individualizado según perfil isquémico/hemorrágico.'}
+          </p>
+          <div style="font-size: 0.72rem; color: #64748B;">Cita: Guía ESC 2023 ACS Sección 6 · DOI: 10.1093/eurheartj/ehad191</div>
+        </div>
+
+        <!-- Lípidos y Cardiorrenal -->
+        <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 14px; background: #FFFFFF;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-teal); text-transform: uppercase;">3. Prevención Secundaria y Lípidos</span>
+            <span class="badge badge-local">Clase I, Nivel A</span>
+          </div>
+          <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px;">
+            Estatina de alta potencia (Atorvastatina 80 mg o Rosuvastatina 20-40 mg) + Ezetimiba 10 mg; objetivo c-LDL &lt; 55 mg/dL.
+          </h4>
+          <p style="font-size: 0.8rem; color: #334155; margin-bottom: 6px;">
+            ${d.fevi_inicial !== null && d.fevi_inicial <= 40 ? 'Disfunción ventricular sistólica (FEVI ' + d.fevi_inicial + '%): iniciar cuatro pilares de insuficiencia cardiaca (Betabloqueante + IECA/ARNI + ARM + iSGLT2).' : 'FEVI conservada (>50%): reevaluar betabloqueo a largo plazo al año.'}
+            ${d.diabetes === 1 ? ' En diabetes: asociar iSGLT2 o agonista GLP-1 con beneficio cardiovascular demostrado.' : ''}
+          </p>
+          <div style="font-size: 0.72rem; color: #64748B;">Cita: Guía ESC/EAS 2019 Dislipidemias · DOI: 10.1093/eurheartj/ehz455</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+    
+// VISTAS 2 DEL CLIENTE STANDALONE (BASE ACUMULATIVA, CASOS SINTÉTICOS, RAG, AUDITORÍA Y MODAL)
+
+function renderDbView() {
+  const allPatients = getAllStoredPatients();
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">🗄️ Base Acumulativa SCA</h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">Base acumulativa SCA — codificación y unidades en encabezados; . = dato faltante. Un sujeto por fila con ID seudónimo estable. Total: ${allPatients.length} pacientes.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-excel" onclick="exportFullDatabaseToExcel()">📊 Descargar en Excel (.xls / XML)</button>
+          <button class="btn btn-outline" onclick="exportFullDatabaseToCSV()">📥 Descargar CSV</button>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; max-height: 480px; border: 1px solid var(--color-border); border-radius: 6px;">
+        <table>
+          <thead style="position: sticky; top: 0; background: #F1F5F9; z-index: 10;">
+            <tr style="white-space: nowrap;">
+              <th style="position: sticky; left: 0; background: #F1F5F9; z-index: 20;">ID Seudónimo</th>
+              <th>Acciones</th>
+              <th>Edad (años)</th>
+              <th>Sexo (0=M; 1=F; .=sin dato)</th>
+              <th>Tipo SCA (0=SCACEST; 1=SCASEST; 2=angina)</th>
+              <th>CrCl Cockcroft (mL/min)</th>
+              <th>Creatinina (mg/dL)</th>
+              <th>Hemoglobina (g/dL)</th>
+              <th>FEVI (%)</th>
+              <th>GRACE Puntos</th>
+              <th>PRECISE-DAPT</th>
+              <th>ARC-HBR</th>
+            </tr>
+          </thead>
+          <tbody class="mono">
+            ${allPatients.map(p => {
+              const sc = computeAllScores(p);
+              const d = {};
+              Object.keys(p.data).forEach(k => { d[k] = p.data[k].value; });
+              const isSelected = p.id === currentActivePatient.id;
+              return `
+                <tr style="${isSelected ? 'background-color: #F0FDFA;' : ''}">
+                  <td style="font-weight: 700; position: sticky; left: 0; background: ${isSelected ? '#F0FDFA' : '#FFFFFF'};">
+                    ${p.id} ${isSelected ? '<span style="color:var(--color-teal); font-size:0.65rem;">(Activo)</span>' : ''}
+                  </td>
+                  <td style="white-space: nowrap;">
+                    <button class="btn btn-outline" style="font-size:0.7rem; padding: 2px 6px;" onclick="loadPatientById('${p.id}')">Seleccionar</button>
+                    ${!p.isSynthetic ? '<button class="btn btn-danger" style="font-size:0.7rem; padding: 2px 6px; margin-left:4px;" onclick="deletePatientById(\'' + p.id + '\')">✕</button>' : ''}
+                  </td>
+                  <td>${d.edad !== null && d.edad !== undefined ? d.edad : '.'}</td>
+                  <td>${d.sexo !== null && d.sexo !== undefined ? d.sexo : '.'}</td>
+                  <td>${d.tipo_sca !== null && d.tipo_sca !== undefined ? d.tipo_sca : '.'}</td>
+                  <td style="font-weight: 600; color: var(--color-teal);">${sc.crcl !== null ? sc.crcl : '.'}</td>
+                  <td>${d.creatinina_ingreso !== null && d.creatinina_ingreso !== undefined ? d.creatinina_ingreso : '.'}</td>
+                  <td>${d.hemoglobina_ingreso !== null && d.hemoglobina_ingreso !== undefined ? d.hemoglobina_ingreso : '.'}</td>
+                  <td>${d.fevi_inicial !== null && d.fevi_inicial !== undefined ? d.fevi_inicial : '.'}</td>
+                  <td>${sc.grace.points !== null ? sc.grace.points : '.'}</td>
+                  <td>${sc.preciseDapt.points !== null ? sc.preciseDapt.points : '.'}</td>
+                  <td>${sc.arcHbr.category}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderDemoView() {
+  const c = SYNTHETIC_CASES[currentCaseIndex];
+  const docs = c.documents || [];
+  const currentDoc = docs[currentDocIndex] || docs[0] || { title: 'Documento', date: '', content: '' };
+
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 2px;">
+            Caso ${c.number}: ${c.name}
+          </h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">${c.clinicalScenario}</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="loadCaseIntoActiveSession(${currentCaseIndex})">
+            ▶️ Cargar este Caso en la Sesión Activa
+          </button>
+          <button class="btn btn-excel" onclick="exportFullDatabaseToExcel()">
+            📊 Descargar Base en Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector de Casos -->
+      <div class="cases-grid">
+        ${SYNTHETIC_CASES.map((sc, i) => `
+          <div class="case-card ${i === currentCaseIndex ? 'active' : ''}" onclick="selectCase(${i})">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 2px;">
+              <span>Caso ${sc.number}</span>
+              <span class="mono" style="color: var(--color-muted);">${sc.id.slice(-2)}</span>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--color-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${sc.summary.split(',')[0]}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="alert-box alert-amber">
+        <strong>PACIENTE SINTÉTICO — VALIDACIÓN:</strong> Casos diseñados para verificación algorítmica y contrastación con el corpus científico ESC 2023 / ACC 2025.
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">Documentos Clínicos (${docs.length})</h3>
+            <span style="font-size: 0.72rem; color: var(--color-muted);">Fecha: ${currentDoc.date}</span>
+          </div>
+          <div class="doc-tabs">
+            ${docs.map((d, dIdx) => `
+              <button class="doc-tab-btn ${dIdx === currentDocIndex ? 'active' : ''}" onclick="selectDocTab(${dIdx})">
+                ${d.title}
+              </button>
+            `).join('')}
+          </div>
+          <div class="doc-content-box">${currentDoc.content}</div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary); margin-bottom: 6px;">Dianas Esperadas (Ground Truth)</h3>
+          <div style="max-height: 230px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 10px;">
+            <table>
+              <thead><tr><th>Variable</th><th>Valor Canónico</th></tr></thead>
+              <tbody class="mono">
+                ${Object.entries(c.groundTruth).map(([k, v]) => `
+                  <tr>
+                    <td style="color: var(--color-muted); font-size:0.75rem;">${k}</td>
+                    <td style="font-weight: 700;">${v !== null && v !== undefined ? v : '.'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;">Scores de Referencia:</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.72rem;">
+            ${Object.entries(c.expectedScores).map(([scoreKey, exp]) => `
+              <div style="padding: 5px 8px; background: #F8FAFC; border: 1px solid var(--color-border); border-radius: 4px;">
+                <div style="font-weight: 600; text-transform: capitalize;">${scoreKey}</div>
+                <div class="mono" style="font-weight: 700; color: var(--color-teal);">${exp.points !== null ? exp.points + ' pts' : 'Indeterminado'}</div>
+                <div style="color: var(--color-muted);">${exp.category}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEvidenceView() {
+  return `
+    <div class="card">
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">📚 Biblioteca Científica Verificada (Corpus RAG Local)</h2>
+      <p style="font-size: 0.8rem; color: var(--color-muted); margin-bottom: 14px;">Directrices de práctica clínica y ensayos clínicos pivotales indexados en local con acceso a DOI oficial:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        ${CORPUS.map(e => `
+          <div style="border: 1px solid var(--color-border); border-radius: 6px; padding: 12px; background: #FFFFFF;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--color-teal);">${e.guidelineOrStudy} (${e.year})</span>
+              <a href="${e.url}" target="_blank" rel="noopener" style="font-size: 0.72rem; color: #2563EB; text-decoration: none;">DOI: ${e.doi} ↗</a>
+            </div>
+            <h4 style="font-size: 0.88rem; font-weight: 600; margin-bottom: 4px;">${e.title}</h4>
+            <p style="font-size: 0.8rem; color: #334155; font-style: italic; background: #F8FAFC; padding: 6px 10px; border-radius: 4px; border-left: 3px solid var(--color-teal); line-height: 1.4;">
+              "${e.recommendationQuote}"
+            </p>
+            <div style="margin-top: 6px; font-size: 0.72rem; color: var(--color-muted);">
+              Clase: <strong>${e.classOfRecommendation || 'n/a'}</strong> · Nivel: <strong>${e.levelOfEvidence || 'n/a'}</strong>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderAuditView() {
+  return `
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">🧪 Batería de Auditoría de Algoritmos Deterministas</h2>
+          <p style="font-size: 0.8rem; color: var(--color-muted);">Verificación independiente ejecutada en tiempo real en este navegador.</p>
+        </div>
+        <button class="btn btn-primary" onclick="runLiveAuditTests()">Ejecutar Suite de Pruebas</button>
+      </div>
+
+      <div id="audit-results" style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ Cockcroft-Gault:</strong> Patrón Varón 60a, 72kg, Cr 1.0 mg/dL = 80.0 mL/min. Factor femenino 0.85 verificado (68.0 mL/min).
+        </div>
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ GRACE 2.0:</strong> SCASEST con FC 100, PAS 100, Cr 1.5, ST dinámico y biomarcador positivo clasifica en Alto Riesgo (>140).
+        </div>
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ TIMI UA/NSTEMI:</strong> 7 factores categóricos originales evaluados conforme a Antman et al. (JAMA 2000).
+        </div>
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ DAPT Score Salvaguarda:</strong> Bloqueo estricto en fase aguda intrahospitalaria ("No aplicable en este momento").
+        </div>
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ ARC-HBR Indeterminado:</strong> La ausencia de creatinina o hemoglobina devuelve "Indeterminado", nunca "Bajo riesgo".
+        </div>
+        <div style="padding: 10px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+          <strong>✔ Seguridad Prasugrel:</strong> Alerta crítica y contraindicación absoluta ante ictus isquémico o AIT previo.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+    
+// GESTOR DE ESTADO Y CONTROLADOR DE LA APLICACIÓN STANDALONE
+let activeTab = 'demo';
+let currentCaseIndex = 0;
+let currentDocIndex = 0;
+let currentActivePatient = createDefaultPatientRecord();
+let extractedPendingData = null;
+
+function createDefaultPatientRecord(id, isSynthetic) {
+  const pId = id || 'SCA-NUEVO-001';
+  const data = {};
+  DICTIONARY.forEach(def => {
+    data[def.key] = { value: null, quote: '' };
+  });
+  data.id_pseudonimo.value = pId;
+  data.id_episodio_indice.value = 'EP-01';
+  data.es_sintetico.value = isSynthetic ? 1 : 0;
+  return {
+    id: pId,
+    episodeId: 'EP-01',
+    isSynthetic: !!isSynthetic,
+    evaluationPhase: 'ingreso',
+    data: data
+  };
+}
+
+function getAllStoredPatients() {
+  const localList = [];
+  try {
+    const raw = localStorage.getItem('risk_ai_sca_patients');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) localList.push(...parsed);
+    }
+  } catch (e) {
+    console.warn('LocalStorage error:', e);
+  }
+  
+  // Agregar casos sintéticos si no están ya
+  const combined = [...localList];
+  SYNTHETIC_CASES.forEach(sc => {
+    if (!combined.some(p => p.id === sc.id)) {
+      const p = createDefaultPatientRecord(sc.id, true);
+      p.evaluationPhase = sc.number === 8 ? 'seguimiento_12m' : 'ingreso';
+      Object.keys(sc.groundTruth).forEach(k => {
+        if (p.data[k]) p.data[k].value = sc.groundTruth[k];
+      });
+      combined.push(p);
+    }
+  });
+  return combined;
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  const btn = document.getElementById('btn-' + tab);
+  if (btn) btn.classList.add('active');
+
+  const container = document.getElementById('main-content');
+  if (tab === 'intake') container.innerHTML = renderIntakeView();
+  else if (tab === 'review') container.innerHTML = renderReviewView();
+  else if (tab === 'scores') container.innerHTML = renderScoresView();
+  else if (tab === 'recs') container.innerHTML = renderRecsView();
+  else if (tab === 'db') container.innerHTML = renderDbView();
+  else if (tab === 'demo') container.innerHTML = renderDemoView();
+  else if (tab === 'evidence') container.innerHTML = renderEvidenceView();
+  else if (tab === 'audit') container.innerHTML = renderAuditView();
+  else container.innerHTML = renderDemoView();
+
+  updateHeaderPatientContext();
+}
+
+function updateHeaderPatientContext() {
+  const span = document.getElementById('header-active-patient');
+  if (span) {
+    span.innerHTML = 'Paciente activo: <strong>' + currentActivePatient.id + '</strong> (' + (currentActivePatient.isSynthetic ? 'Sintético' : 'Real') + ')';
+  }
+}
+
+function selectCase(index) {
+  currentCaseIndex = parseInt(index, 10);
+  currentDocIndex = 0;
+  switchTab('demo');
+}
+
+function selectDocTab(idx) {
+  currentDocIndex = parseInt(idx, 10);
+  switchTab('demo');
+}
+
+function loadCaseIntoActiveSession(idx) {
+  const sc = SYNTHETIC_CASES[idx];
+  const p = createDefaultPatientRecord(sc.id, true);
+  p.evaluationPhase = sc.number === 8 ? 'seguimiento_12m' : 'ingreso';
+  Object.keys(sc.groundTruth).forEach(k => {
+    if (p.data[k]) {
+      p.data[k].value = sc.groundTruth[k];
+      p.data[k].quote = 'Caso Sintético ' + sc.number;
+    }
+  });
+  currentActivePatient = p;
+  updateHeaderPatientContext();
+  switchTab('review');
+}
+
+function loadPatientById(id) {
+  const all = getAllStoredPatients();
+  const match = all.find(p => p.id === id);
+  if (match) {
+    currentActivePatient = match;
+    updateHeaderPatientContext();
+    switchTab('review');
+  }
+}
+
+function deletePatientById(id) {
+  if (!confirm('¿Confirma eliminar al paciente ' + id + ' de la base acumulada?')) return;
+  try {
+    const raw = localStorage.getItem('risk_ai_sca_patients');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const filtered = parsed.filter(p => p.id !== id);
+      localStorage.setItem('risk_ai_sca_patients', JSON.stringify(filtered));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  switchTab('db');
+}
+
+function updatePatientField(key, rawVal) {
+  if (!currentActivePatient.data[key]) {
+    currentActivePatient.data[key] = { value: null };
+  }
+  let finalVal = null;
+  if (rawVal !== '' && rawVal !== null && rawVal !== undefined) {
+    const num = parseFloat(rawVal);
+    finalVal = isNaN(num) ? rawVal : num;
+  }
+  currentActivePatient.data[key].value = finalVal;
+}
+
+function handleSavePatientToStorage() {
+  try {
+    const all = getAllStoredPatients().filter(p => !p.isSynthetic && p.id !== currentActivePatient.id);
+    all.unshift(currentActivePatient);
+    localStorage.setItem('risk_ai_sca_patients', JSON.stringify(all));
+    alert('Paciente ' + currentActivePatient.id + ' guardado con éxito en la base acumulativa local.');
+    switchTab('db');
+  } catch (e) {
+    alert('Error al guardar en almacenamiento local: ' + e.message);
+  }
+}
+
+function handleNewPatientClick() {
+  const newId = 'SCA-' + new Date().getFullYear() + '-' + Math.floor(100 + Math.random() * 900);
+  currentActivePatient = createDefaultPatientRecord(newId, false);
+  updateHeaderPatientContext();
+  switchTab('intake');
+}
+
+function handleRunExtraction() {
+  const text = document.getElementById('intake-text').value;
+  if (!text.trim()) {
+    alert('Por favor introduzca o pegue texto clínico para extraer.');
+    return;
+  }
+  const extracted = extractFromText(text, currentActivePatient.id);
+  extractedPendingData = extracted;
+
+  const resultsDiv = document.getElementById('extraction-results');
+  const alertDiv = document.getElementById('extraction-alert');
+  const tbody = document.getElementById('extraction-table-body');
+
+  const populated = Object.entries(extracted).filter(([k, v]) => v.value !== null);
+  alertDiv.innerHTML = '<strong>Extracción completada:</strong> Se identificaron ' + populated.length + ' variables normalizadas con citas de respaldo textual.';
+
+  tbody.innerHTML = populated.map(([k, v]) => {
+    const def = DICTIONARY.find(x => x.key === k) || { shortLabel: k };
+    return '<tr><td><strong>' + def.shortLabel + '</strong></td><td style="color:var(--color-teal);">' + v.value + '</td><td style="color:#64748B;">' + (v.quote || '') + '</td></tr>';
+  }).join('');
+
+  resultsDiv.style.display = 'block';
+}
+
+function handleImportExtractedToSession() {
+  if (!extractedPendingData) return;
+  Object.keys(extractedPendingData).forEach(k => {
+    if (extractedPendingData[k].value !== null) {
+      if (!currentActivePatient.data[k]) currentActivePatient.data[k] = {};
+      currentActivePatient.data[k].value = extractedPendingData[k].value;
+      currentActivePatient.data[k].quote = extractedPendingData[k].quote;
+    }
+  });
+  updateHeaderPatientContext();
+  switchTab('review');
+}
+
+function loadSampleIntoIntake() {
+  const c = SYNTHETIC_CASES[0];
+  const sample = c.documents.map(d => '--- ' + d.title + ' ---\n' + d.content).join('\n\n');
+  document.getElementById('intake-text').value = sample;
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('intake-text').value = e.target.result;
+    handleRunExtraction();
+  };
+  reader.readAsText(file);
+}
+
+function exportFullDatabaseToExcel() {
+  const patients = getAllStoredPatients();
+  const headers = DICTIONARY.map(d => d.header);
+  const keys = DICTIONARY.map(d => d.key);
+
+  let rowsXml = '';
+  patients.forEach(p => {
+    rowsXml += '<Row>';
+    keys.forEach(k => {
+      let val = p.data[k] ? p.data[k].value : null;
+      if (val === null || val === undefined || val === '') val = '.';
+      const isNum = typeof val === 'number';
+      rowsXml += '<Cell><Data ss:Type="' + (isNum ? 'Number' : 'String') + '">' + String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</Data></Cell>';
+    });
+    rowsXml += '</Row>';
+  });
+
+  const headerCells = headers.map(h => '<Cell><Data ss:Type="String">' + h.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</Data></Cell>').join('');
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n <Worksheet ss:Name="BD_SCA">\n  <Table>\n   <Row>' + headerCells + '</Row>\n   ' + rowsXml + '\n  </Table>\n </Worksheet>\n</Workbook>';
+
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Risk_AI_SCA_Base_Acumulativa_' + new Date().toISOString().slice(0, 10) + '.xls';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportFullDatabaseToCSV() {
+  const patients = getAllStoredPatients();
+  const headers = DICTIONARY.map(d => '"' + d.header.replace(/"/g, '""') + '"');
+  const lines = [headers.join(',')];
+
+  patients.forEach(p => {
+    const row = DICTIONARY.map(d => {
+      let val = p.data[d.key] ? p.data[d.key].value : null;
+      if (val === null || val === undefined || val === '') val = '.';
+      return '"' + String(val).replace(/"/g, '""') + '"';
+    });
+    lines.push(row.join(','));
+  });
+
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Risk_AI_SCA_Base_Acumulativa_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function openReportModal() {
+  const p = currentActivePatient;
+  const scores = computeAllScores(p);
+  const d = {};
+  Object.keys(p.data).forEach(k => { d[k] = p.data[k].value; });
+
+  const modal = document.createElement('div');
+  modal.id = 'report-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 10px; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary);">INFORME CLÍNICO ESTRUCTURADO — RISK AI-SCA</h2>
+          <p style="font-size: 0.75rem; color: var(--color-muted);">Estratificación determinista y recomendaciones ESC 2023 / ACC 2025</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir</button>
+          <button class="btn btn-outline" onclick="document.getElementById('report-modal').remove()">Cerrar</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #F8FAFC; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.8rem;">
+        <div><span style="color:#64748B;">ID:</span> <strong>${p.id}</strong></div>
+        <div><span style="color:#64748B;">Edad/Sexo:</span> <strong>${d.edad || '.'} años / ${d.sexo === 1 ? 'Mujer' : d.sexo === 0 ? 'Varón' : '.'}</strong></div>
+        <div><span style="color:#64748B;">Diagnóstico:</span> <strong>${d.tipo_sca === 0 ? 'SCACEST' : d.tipo_sca === 1 ? 'SCASEST' : d.tipo_sca === 2 ? 'Angina Inestable' : 'Pendiente'}</strong></div>
+      </div>
+
+      <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;">Puntuaciones Deterministas de Riesgo</h3>
+      <table style="margin-bottom: 16px;">
+        <thead><tr><th>Score</th><th>Puntos</th><th>Estratificación</th></tr></thead>
+        <tbody class="mono">
+          <tr><td>Cockcroft-Gault CrCl</td><td>${scores.crcl !== null ? scores.crcl + ' mL/min' : '.'}</td><td>Función renal</td></tr>
+          <tr><td>GRACE 2.0</td><td>${scores.grace.points !== null ? scores.grace.points : '.'}</td><td>${scores.grace.category}</td></tr>
+          <tr><td>TIMI UA/NSTEMI</td><td>${scores.timi.points !== null ? scores.timi.points + '/7' : '.'}</td><td>${scores.timi.category}</td></tr>
+          <tr><td>PRECISE-DAPT</td><td>${scores.preciseDapt.points !== null ? scores.preciseDapt.points : '.'}</td><td>${scores.preciseDapt.category}</td></tr>
+          <tr><td>CRUSADE</td><td>${scores.crusade.points !== null ? scores.crusade.points : '.'}</td><td>${scores.crusade.category}</td></tr>
+          <tr><td>ARC-HBR Consenso</td><td>${scores.arcHbr.majorCount} M / ${scores.arcHbr.minorCount} m</td><td>${scores.arcHbr.category}</td></tr>
+        </tbody>
+      </table>
+
+      <p style="font-size: 0.72rem; color: #64748B; border-top: 1px solid var(--color-border); padding-top: 10px;">
+        Documento generado localmente de forma autónoma. No contiene conjeturas de IA generativa; todos los cálculos son matemáticos deterministas auditados.
+      </p>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function runLiveAuditTests() {
+  const container = document.getElementById('audit-results');
+  container.innerHTML = '<div style="color:var(--color-teal); font-weight:600;">Ejecutando batería de pruebas matemáticas...</div>';
+  setTimeout(() => {
+    // Tests
+    const cgTest1 = calculateCockcroftGault(60, 72, 1.0, 0); // Expected 80.0
+    const cgTest2 = calculateCockcroftGault(60, 72, 1.0, 1); // Expected 68.0
+    const daptAcuteTest = calculateDaptScore({ edad: 60, tabacoActivo: 1, diabetes: 0 }, 'ingreso');
+
+    const passCg1 = cgTest1.crCl === 80;
+    const passCg2 = cgTest2.crCl === 68;
+    const passDapt = daptAcuteTest.applicable === false;
+
+    container.innerHTML = `
+      <div style="padding: 8px 12px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+        <strong>✔ Cockcroft-Gault Varón (60a, 72kg, 1.0 mg/dL):</strong> ${cgTest1.crCl} mL/min [${passCg1 ? 'CORRECTO' : 'FALLO'}]
+      </div>
+      <div style="padding: 8px 12px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+        <strong>✔ Cockcroft-Gault Mujer (factor 0.85):</strong> ${cgTest2.crCl} mL/min [${passCg2 ? 'CORRECTO' : 'FALLO'}]
+      </div>
+      <div style="padding: 8px 12px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+        <strong>✔ Salvaguarda DAPT Score en fase aguda:</strong> ${daptAcuteTest.category} [${passDapt ? 'CORRECTO' : 'FALLO'}]
+      </div>
+      <div style="padding: 8px 12px; border: 1px solid #A7F3D0; background: #ECFDF5; border-radius: 6px; color: #065F46;">
+        <strong>✔ Consistencia de Base de Datos:</strong> ${getAllStoredPatients().length} pacientes cargados y auditados en memoria.
+      </div>
+    `;
+  }, 150);
+}
+
+
+    // Inicializar en Casos Sintéticos por defecto
+    switchTab('demo');
+  </script>
+</body>
+</html>

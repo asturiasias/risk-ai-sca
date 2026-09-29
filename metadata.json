@@ -1,0 +1,6 @@
+{
+  "name": "Risk AI-SCA",
+  "description": "Plataforma web de apoyo a la evaluación médica del síndrome coronario agudo: calculadoras deterministas validadas, extracción de datos, biblioteca científica RAG y base acumulativa de investigación.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
